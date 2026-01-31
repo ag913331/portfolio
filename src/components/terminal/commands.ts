@@ -5,16 +5,16 @@ export type TerminalCommandResult = {
 export type TerminalCommands = Record<string, TerminalCommandResult>;
 
 export const AVAILABLE_COMMANDS = [
-  "system --init",
-  "whoami",
   "contacts",
   "education",
-  "experience",
-  "skills",
-  "projects",
-  "life",
-  "help",
   "exit",
+  "experience",
+  "help",
+  "life",
+  "projects",
+  "skills",
+  "system --init",
+  "whoami",
 ] as const;
 
 export const TERMINAL_COMMANDS: TerminalCommands = {
@@ -29,13 +29,13 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "Kernel: v5.15.0-generic",
       "",
       "Available commands:",
-      "  → whoami",
       "  → contacts",
       "  → education",
       "  → experience",
-      "  → skills",
-      "  → projects",
       "  → life",
+      "  → projects",
+      "  → skills",
+      "  → whoami",
       "",
       "Tip:",
       "  - Type 'help' to list commands.",
