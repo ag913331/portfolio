@@ -22,6 +22,10 @@ function toHref(raw: string) {
 }
 
 function renderOutputLine(text: string, linkClassName: string) {
+  if (text.trimStart().startsWith("★")) {
+    return <span className={styles.sectionHeader}>{text}</span>;
+  }
+
   // Handles lines like: "  - GitHub: https://..." or "  - Email: foo@bar.com"
   const m = text.match(/^(\s*-\s*[^:]+:\s*)(.+)$/);
   if (m) {
