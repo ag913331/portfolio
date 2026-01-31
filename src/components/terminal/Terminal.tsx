@@ -70,6 +70,19 @@ function renderOutputLine(text: string, linkClassName: string) {
   return text;
 }
 
+function parseQuotedJsonValueLine(text: string) {
+  // Matches lines like: '  "institution": "Some School",'
+  // Captures prefix up to opening quote of the value, the value itself, and suffix (closing quote + comma/etc).
+  const m = text.match(/^(\s*"(institution|degree)"\s*:\s*")([^"]*)(".*)$/);
+  if (!m) return null;
+
+  const key = (m[2] ?? "") as "institution" | "degree";
+  const prefix = m[1] ?? "";
+  const value = m[3] ?? "";
+  const suffix = m[4] ?? "";
+  return { key, prefix, value, suffix };
+}
+
 function formatLastLogin(d: Date) {
   // Example: Sat Jan 31 09:41:02
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -208,6 +221,8 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
     runCommand(cmd);
   }
 
+  let degreeIdx = 0;
+
   return (
     <div className={`${styles.wrap} ${isMaximized ? styles.wrapMax : ""}`} onMouseDown={focusInput}>
       <div
@@ -267,6 +282,32 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
                     <span key={e.id} className={styles.line}>
                       <span>Status:&nbsp;</span>
                       <span className={styles.statusValue}>{value}</span>
+                    </span>
+                  );
+                }
+
+                const parsed = parseQuotedJsonValueLine(e.text);
+                if (!e.muted && parsed) {
+                  if (parsed.key === "degree") degreeIdx += 1;
+                  const degreeClass =
+                    parsed.key === "degree"
+                      ? degreeIdx === 1
+                        ? styles.degree1
+                        : degreeIdx === 2
+                          ? styles.degree2
+                          : degreeIdx === 3
+                            ? styles.degree3
+                            : ""
+                      : "";
+
+                  const valueClass =
+                    parsed.key === "institution" ? styles.institutionValue : degreeClass || undefined;
+
+                  return (
+                    <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
+                      {parsed.prefix}
+                      <span className={valueClass}>{parsed.value}</span>
+                      {parsed.suffix}
                     </span>
                   );
                 }

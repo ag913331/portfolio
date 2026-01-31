@@ -169,6 +169,22 @@
   color: rgba(56, 189, 248, 0.95);
 }
 
+.institutionValue {
+  color: rgba(56, 189, 248, 0.95);
+}
+
+.degree1 {
+  color: rgba(34, 197, 94, 0.95);
+}
+
+.degree2 {
+  color: rgba(254, 188, 46, 0.95);
+}
+
+.degree3 {
+  color: rgba(239, 68, 68, 0.95);
+}
+
 .promptRow {
   display: flex;
   align-items: baseline;
