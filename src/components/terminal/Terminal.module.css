@@ -155,6 +155,16 @@
   color: rgba(34, 197, 94, 0.95);
 }
 
+.terminalLink {
+  color: rgba(56, 189, 248, 0.95);
+  text-decoration: none;
+}
+
+.terminalLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .promptRow {
   display: flex;
   align-items: baseline;

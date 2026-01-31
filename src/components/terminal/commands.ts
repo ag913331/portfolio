@@ -39,11 +39,10 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
   },
   whoami: {
     lines: [
-      "🔧 Python Automation | DevOps Engineer | Fullstack Developer (React & Next.js)",
-      "",
-      "I'm a software engineer passionate about automation, system reliability, and cross-functional problem-solving.",
-      "With a foundation in backend scripting and a strong grasp of DevOps culture and tools, I specialize in:",
-      "",
+      "Hello, I'm Alexandro Georgiev. I'm a software engineer passionate about automation, system reliability, and cross-functional problem-solving.",
+      " ",
+      "With a foundation in backend scripting and a strong grasp of DevOps culture and tools, I specialize in: Python Automation | DevOps Engineer | Fullstack Developer (React & Next.js).",
+      " ",
       "★ Python Automation & DevOps",
       "  • Designed and deployed scalable CI/CD pipelines using Jenkins, Docker, Groovy, and Git",
       "  • Automated OS provisioning and upgrades across hundreds of servers with Python/Bash, Redfish API, and Airflow",

@@ -8,6 +8,64 @@ type Entry =
   | { kind: "output"; id: string; text: string; muted?: boolean }
   | { kind: "input"; id: string; command: string };
 
+function toHref(raw: string) {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  if (trimmed.includes("@") && !trimmed.includes("://") && !trimmed.startsWith("www.")) {
+    return `mailto:${trimmed}`;
+  }
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  if (trimmed.startsWith("www.")) return `https://${trimmed}`;
+  return null;
+}
+
+function renderOutputLine(text: string, linkClassName: string) {
+  // Handles lines like: "  - GitHub: https://..." or "  - Email: foo@bar.com"
+  const m = text.match(/^(\s*-\s*[^:]+:\s*)(.+)$/);
+  if (m) {
+    const prefix = m[1] ?? "";
+    const value = (m[2] ?? "").trim();
+    const href = toHref(value);
+
+    if (href) {
+      const isMail = href.startsWith("mailto:");
+      return (
+        <>
+          {prefix}
+          <a
+            className={linkClassName}
+            href={href}
+            target={isMail ? undefined : "_blank"}
+            rel={isMail ? undefined : "noopener noreferrer"}
+          >
+            {value}
+          </a>
+        </>
+      );
+    }
+  }
+
+  // Fallback: if the entire line is a URL.
+  const href = toHref(text);
+  if (href) {
+    const isMail = href.startsWith("mailto:");
+    return (
+      <a
+        className={linkClassName}
+        href={href}
+        target={isMail ? undefined : "_blank"}
+        rel={isMail ? undefined : "noopener noreferrer"}
+      >
+        {text}
+      </a>
+    );
+  }
+
+  return text;
+}
+
 function formatLastLogin(d: Date) {
   // Example: Sat Jan 31 09:41:02
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -211,7 +269,7 @@ export function Terminal() {
 
                 return (
                   <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
-                    {e.text}
+                    {renderOutputLine(e.text, styles.terminalLink)}
                   </span>
                 );
               }
