@@ -43,6 +43,7 @@ export function Terminal() {
   const [historyIdx, setHistoryIdx] = useState<number | null>(null);
   const [isBooting, setIsBooting] = useState(true);
   const [bootTyped, setBootTyped] = useState("");
+  const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -137,24 +138,68 @@ export function Terminal() {
   }
 
   return (
-    <div className={styles.wrap} onMouseDown={focusInput}>
-      <div className={styles.window} role="application" aria-label="Portfolio terminal">
+    <div className={`${styles.wrap} ${isMaximized ? styles.wrapMax : ""}`} onMouseDown={focusInput}>
+      <div
+        className={`${styles.window} ${isMaximized ? styles.windowMax : ""}`}
+        role="application"
+        aria-label="Portfolio terminal"
+      >
         <div className={styles.glow} />
         <div className={styles.scanlines} />
 
-        <div className={styles.chrome} aria-hidden="true">
+        <div className={styles.chrome}>
           <div className={styles.dots}>
-            <span className={`${styles.dot} ${styles.dotRed}`} />
-            <span className={`${styles.dot} ${styles.dotYellow}`} />
-            <span className={`${styles.dot} ${styles.dotGreen}`} />
+            <button
+              type="button"
+              className={styles.dotButton}
+              aria-label="Close (not configured)"
+              title="Close (not configured)"
+              onClick={() => {
+                // Intentionally no-op for now.
+              }}
+            >
+              <span className={`${styles.dot} ${styles.dotRed}`} />
+            </button>
+
+            <button
+              type="button"
+              className={styles.dotButton}
+              aria-label="Restore size"
+              title="Restore size"
+              disabled={!isMaximized}
+              onClick={() => setIsMaximized(false)}
+            >
+              <span className={`${styles.dot} ${styles.dotYellow}`} />
+            </button>
+
+            <button
+              type="button"
+              className={styles.dotButton}
+              aria-label="Maximize"
+              title="Maximize"
+              disabled={isMaximized}
+              onClick={() => setIsMaximized(true)}
+            >
+              <span className={`${styles.dot} ${styles.dotGreen}`} />
+            </button>
           </div>
-          <div className={styles.title}>bash — 80x24</div>
+          <div className={styles.title}>alexandro@localhost:~</div>
         </div>
 
-        <div className={styles.screen}>
+        <div className={`${styles.screen} ${isMaximized ? styles.screenMax : ""}`}>
           <div className={styles.output} aria-live="polite">
             {entries.map((e) => {
               if (e.kind === "output") {
+                if (!e.muted && e.text.startsWith("Status:")) {
+                  const value = e.text.slice("Status:".length).trim();
+                  return (
+                    <span key={e.id} className={styles.line}>
+                      <span>Status:&nbsp;</span>
+                      <span className={styles.statusValue}>{value}</span>
+                    </span>
+                  );
+                }
+
                 return (
                   <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
                     {e.text}
@@ -254,7 +299,7 @@ function Prompt() {
     <span className={styles.prompt} aria-hidden="true">
       <span className={styles.promptUser}>alexandro</span>
       <span className={styles.promptAt}>@</span>
-      <span className={styles.promptHost}>portfolio</span>
+      <span className={styles.promptHost}>localhost</span>
       <span className={styles.promptColon}>:</span>
       <span className={styles.promptPath}>~</span>
       <span className={styles.promptSymbol}>$</span>

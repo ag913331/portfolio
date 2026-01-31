@@ -43,9 +43,9 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "I build production systems end‑to‑end: apps, infra, CI/CD, observability, and security.",
       "",
       "Links:",
-      "  - GitHub: https://github.com/<your-handle>",
-      "  - LinkedIn: https://linkedin.com/in/<your-handle>",
-      "  - Email: you@example.com",
+      "  - GitHub: https://github.com/ag913331",
+      "  - LinkedIn: www.linkedin.com/in/alexandro-georgiev-711b631b5",
+      "  - Email: georgievalexandro@gmail.com",
     ],
   },
   skills: {
