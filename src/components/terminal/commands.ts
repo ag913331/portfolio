@@ -14,7 +14,7 @@ export const AVAILABLE_COMMANDS = [
   "projects",
   "life",
   "help",
-  "clear",
+  "exit",
 ] as const;
 
 export const TERMINAL_COMMANDS: TerminalCommands = {
@@ -36,9 +36,11 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "  → skills",
       "  → projects",
       "  → life",
-      "  → clear",
       "",
-      "Tip: type 'help' to list commands.",
+      "Tip:",
+      "  - Type 'help' to list commands.",
+      "  - Type 'clear' to clear the screen.",
+      "  - Type 'exit' to exit the terminal.",
     ],
   },
   whoami: {

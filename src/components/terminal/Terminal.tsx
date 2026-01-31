@@ -196,6 +196,11 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
     setHistory((prev) => (prev[prev.length - 1] === command ? prev : [...prev, command]));
     setHistoryIdx(null);
 
+    if (command === "exit") {
+      onClose?.();
+      return;
+    }
+
     if (command === "clear") {
       setEntries([{ kind: "output", id: makeId(), text: "" }]);
       return;
