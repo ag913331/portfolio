@@ -106,10 +106,12 @@
     "Courier New", monospace;
   color: rgba(226, 232, 240, 0.92);
   min-height: min(72vh, 640px);
+  max-height: min(72vh, 640px);
 }
 
 .screenMax {
   min-height: 0;
+  max-height: 100%;
 }
 
 .scanlines {
