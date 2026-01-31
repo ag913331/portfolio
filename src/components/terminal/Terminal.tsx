@@ -26,6 +26,23 @@ function renderOutputLine(text: string, linkClassName: string) {
     return <span className={styles.sectionHeader}>{text}</span>;
   }
 
+  if (text.startsWith("o-------->")) {
+    return <span className={styles.experiencePosition}>{text}</span>;
+  }
+
+  const periodMatch = text.match(/^(\|\s*period:\s*)(.+)$/);
+  if (periodMatch) {
+    const prefix = periodMatch[1] ?? "";
+    const value = (periodMatch[2] ?? "").trim();
+    const isCurrent = value === "Nov 2024 - Current";
+    return (
+      <>
+        {prefix}
+        <span className={isCurrent ? styles.experiencePeriodCurrent : styles.experiencePeriod}>{value}</span>
+      </>
+    );
+  }
+
   // Handles lines like: "  - GitHub: https://..." or "  - Email: foo@bar.com"
   const m = text.match(/^(\s*-\s*[^:]+:\s*)(.+)$/);
   if (m) {
