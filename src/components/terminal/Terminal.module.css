@@ -188,6 +188,31 @@
   margin-left: 6px;
 }
 
+.inputWrap {
+  position: relative;
+  flex: 1;
+}
+
+.ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: baseline;
+  pointer-events: none;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre;
+}
+
+.ghostTyped {
+  visibility: hidden;
+}
+
+.ghostRemainder {
+  color: rgba(148, 163, 184, 0.75);
+}
+
 .input {
   flex: 1;
   background: transparent;
@@ -197,6 +222,7 @@
   font: inherit;
   font-size: 14px;
   caret-color: rgba(56, 189, 248, 1);
+  width: 100%;
 }
 
 .hint {
@@ -229,7 +255,8 @@
     min-height: min(76vh, 620px);
   }
   .output,
-  .input {
+  .input,
+  .ghost {
     font-size: 13px;
   }
 }

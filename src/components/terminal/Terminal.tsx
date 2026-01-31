@@ -45,6 +45,15 @@ export function Terminal() {
   const [bootTyped, setBootTyped] = useState("");
   const [isMaximized, setIsMaximized] = useState(false);
 
+  const suggestion = useMemo(() => {
+    const q = value.trim();
+    if (!q) return null;
+
+    const match = AVAILABLE_COMMANDS.find((c) => c.startsWith(q));
+    if (!match || match === q) return null;
+    return match;
+  }, [value]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [entries.length]);
@@ -235,53 +244,74 @@ export function Terminal() {
               Terminal input
             </label>
             <Prompt />
-            <input
-              id="terminal-input"
-              ref={inputRef}
-              className={styles.input}
-              value={value}
-              disabled={isBooting}
-              autoCapitalize="none"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (isBooting) return;
-                if (e.key === "Enter") return;
+            <div className={styles.inputWrap}>
+              <div className={styles.ghost} aria-hidden="true">
+                {suggestion ? (
+                  <>
+                    <span className={styles.ghostTyped}>{value}</span>
+                    <span className={styles.ghostRemainder}>{suggestion.slice(value.trim().length)}</span>
+                  </>
+                ) : (
+                  <span className={styles.ghostTyped}>{value}</span>
+                )}
+              </div>
+              <input
+                id="terminal-input"
+                ref={inputRef}
+                className={styles.input}
+                value={value}
+                disabled={isBooting}
+                autoCapitalize="none"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (isBooting) return;
 
-                if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
-                  e.preventDefault();
-                  setValue("");
-                  runCommand("clear");
-                  return;
-                }
-
-                if (e.key === "ArrowUp") {
-                  e.preventDefault();
-                  setHistoryIdx((prev) => {
-                    const next = prev === null ? history.length - 1 : Math.max(0, prev - 1);
-                    setValue(history[next] ?? "");
-                    return next;
-                  });
-                  return;
-                }
-
-                if (e.key === "ArrowDown") {
-                  e.preventDefault();
-                  setHistoryIdx((prev) => {
-                    if (prev === null) return null;
-                    const next = prev + 1;
-                    if (next >= history.length) {
-                      setValue("");
-                      return null;
+                  if (e.key === "Tab") {
+                    if (suggestion) {
+                      e.preventDefault();
+                      setValue(suggestion);
                     }
-                    setValue(history[next] ?? "");
-                    return next;
-                  });
-                }
-              }}
-            />
+                    return;
+                  }
+
+                  if (e.key === "Enter") return;
+
+                  if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
+                    e.preventDefault();
+                    setValue("");
+                    runCommand("clear");
+                    return;
+                  }
+
+                  if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setHistoryIdx((prev) => {
+                      const next = prev === null ? history.length - 1 : Math.max(0, prev - 1);
+                      setValue(history[next] ?? "");
+                      return next;
+                    });
+                    return;
+                  }
+
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setHistoryIdx((prev) => {
+                      if (prev === null) return null;
+                      const next = prev + 1;
+                      if (next >= history.length) {
+                        setValue("");
+                        return null;
+                      }
+                      setValue(history[next] ?? "");
+                      return next;
+                    });
+                  }
+                }}
+              />
+            </div>
           </form>
 
           <div className={styles.hint}>
