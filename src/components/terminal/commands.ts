@@ -166,6 +166,7 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "  - Commands are case-sensitive.",
       "  - Use ↑ / ↓ to cycle history.",
       "  - Use Ctrl+L to clear.",
+      "  - Use Tab to autocomplete commands.",
     ],
   },
 };

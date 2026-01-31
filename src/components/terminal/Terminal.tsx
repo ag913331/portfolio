@@ -86,7 +86,7 @@ function makeId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export function Terminal() {
+export function Terminal({ onClose }: { onClose?: () => void }) {
   const bootDate = useMemo(() => new Date(), []);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -219,10 +219,10 @@ export function Terminal() {
             <button
               type="button"
               className={styles.dotButton}
-              aria-label="Close (not configured)"
-              title="Close (not configured)"
+              aria-label="Close terminal"
+              title="Close terminal"
               onClick={() => {
-                // Intentionally no-op for now.
+                onClose?.();
               }}
             >
               <span className={`${styles.dot} ${styles.dotRed}`} />
