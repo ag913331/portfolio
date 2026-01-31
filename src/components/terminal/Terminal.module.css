@@ -1,0 +1,179 @@
+.wrap {
+  width: min(980px, 92vw);
+}
+
+.window {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(14, 20, 28, 0.95), rgba(7, 9, 12, 0.95));
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 80px rgba(56, 189, 248, 0.08);
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  opacity: 0.9;
+}
+
+.dotRed {
+  background: #ff5f57;
+}
+.dotYellow {
+  background: #febc2e;
+}
+.dotGreen {
+  background: #28c840;
+}
+
+.title {
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  color: rgba(226, 232, 240, 0.75);
+  user-select: none;
+}
+
+.screen {
+  position: relative;
+  padding: 18px 18px 16px;
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  color: rgba(226, 232, 240, 0.92);
+  min-height: min(72vh, 640px);
+}
+
+.scanlines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.035),
+    rgba(255, 255, 255, 0.035) 1px,
+    rgba(0, 0, 0, 0) 3px,
+    rgba(0, 0, 0, 0) 6px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.25;
+}
+
+.glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 50% 30%, rgba(56, 189, 248, 0.12), rgba(0, 0, 0, 0) 55%);
+  filter: blur(10px);
+}
+
+.output {
+  white-space: pre-wrap;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.line {
+  display: block;
+}
+
+.muted {
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.promptRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.prompt {
+  display: inline-flex;
+  gap: 0;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.promptUser {
+  color: rgba(34, 197, 94, 0.95);
+}
+
+.promptAt,
+.promptHost,
+.promptColon {
+  color: rgba(226, 232, 240, 0.75);
+}
+
+.promptPath {
+  color: rgba(56, 189, 248, 0.95);
+}
+
+.promptSymbol {
+  color: rgba(226, 232, 240, 0.92);
+  margin-left: 6px;
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(226, 232, 240, 0.92);
+  font: inherit;
+  font-size: 14px;
+  caret-color: rgba(56, 189, 248, 1);
+}
+
+.hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: rgba(148, 163, 184, 0.8);
+  user-select: none;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@media (max-width: 480px) {
+  .screen {
+    padding: 14px 14px 12px;
+    min-height: min(76vh, 620px);
+  }
+  .output,
+  .input {
+    font-size: 13px;
+  }
+}
+
+

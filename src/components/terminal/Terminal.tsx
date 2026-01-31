@@ -1,0 +1,219 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import styles from "./Terminal.module.css";
+import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "./commands";
+
+type Entry =
+  | { kind: "output"; id: string; text: string; muted?: boolean }
+  | { kind: "input"; id: string; command: string };
+
+function formatLastLogin(d: Date) {
+  // Example: Sat Jan 31 09:41:02
+  const parts = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("weekday")} ${get("month")} ${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+}
+
+function makeId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+export function Terminal() {
+  const bootDate = useMemo(() => new Date(), []);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const [entries, setEntries] = useState<Entry[]>(() => [
+    { kind: "output", id: makeId(), text: `Last login: ${formatLastLogin(bootDate)} on ttys001`, muted: true },
+    { kind: "input", id: makeId(), command: "system --init" },
+    ...TERMINAL_COMMANDS["system --init"].lines.map((l) => ({
+      kind: "output" as const,
+      id: makeId(),
+      text: l,
+    })),
+    { kind: "output", id: makeId(), text: "" },
+  ]);
+
+  const [value, setValue] = useState("");
+  const [history, setHistory] = useState<string[]>(["system --init"]);
+  const [historyIdx, setHistoryIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [entries.length]);
+
+  function focusInput() {
+    inputRef.current?.focus();
+  }
+
+  function pushOutput(lines: string[], muted?: boolean) {
+    setEntries((prev) => [
+      ...prev,
+      ...lines.map((text) => ({ kind: "output" as const, id: makeId(), text, muted })),
+    ]);
+  }
+
+  function runCommand(raw: string) {
+    const command = raw.trim();
+    if (!command) return;
+
+    setEntries((prev) => [...prev, { kind: "input", id: makeId(), command }]);
+    setHistory((prev) => (prev[prev.length - 1] === command ? prev : [...prev, command]));
+    setHistoryIdx(null);
+
+    if (command === "clear") {
+      setEntries([{ kind: "output", id: makeId(), text: "" }]);
+      return;
+    }
+
+    if (command === "help") {
+      pushOutput(TERMINAL_COMMANDS.help.lines);
+      return;
+    }
+
+    const exact = TERMINAL_COMMANDS[command];
+    if (exact) {
+      pushOutput(exact.lines);
+      return;
+    }
+
+    pushOutput([`Command not found: ${command}`, "Type 'help' to list available commands."], true);
+  }
+
+  function onSubmit() {
+    const cmd = value;
+    setValue("");
+    runCommand(cmd);
+  }
+
+  return (
+    <div className={styles.wrap} onMouseDown={focusInput}>
+      <div className={styles.window} role="application" aria-label="Portfolio terminal">
+        <div className={styles.glow} />
+        <div className={styles.scanlines} />
+
+        <div className={styles.chrome} aria-hidden="true">
+          <div className={styles.dots}>
+            <span className={`${styles.dot} ${styles.dotRed}`} />
+            <span className={`${styles.dot} ${styles.dotYellow}`} />
+            <span className={`${styles.dot} ${styles.dotGreen}`} />
+          </div>
+          <div className={styles.title}>bash — 80x24</div>
+        </div>
+
+        <div className={styles.screen}>
+          <div className={styles.output} aria-live="polite">
+            {entries.map((e) => {
+              if (e.kind === "output") {
+                return (
+                  <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
+                    {e.text}
+                  </span>
+                );
+              }
+
+              return (
+                <span key={e.id} className={styles.line}>
+                  <Prompt />
+                  {e.command}
+                </span>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+
+          <form
+            className={styles.promptRow}
+            onSubmit={(ev) => {
+              ev.preventDefault();
+              onSubmit();
+            }}
+          >
+            <label className={styles.srOnly} htmlFor="terminal-input">
+              Terminal input
+            </label>
+            <Prompt />
+            <input
+              id="terminal-input"
+              ref={inputRef}
+              className={styles.input}
+              value={value}
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") return;
+
+                if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
+                  e.preventDefault();
+                  setValue("");
+                  runCommand("clear");
+                  return;
+                }
+
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setHistoryIdx((prev) => {
+                    const next = prev === null ? history.length - 1 : Math.max(0, prev - 1);
+                    setValue(history[next] ?? "");
+                    return next;
+                  });
+                  return;
+                }
+
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setHistoryIdx((prev) => {
+                    if (prev === null) return null;
+                    const next = prev + 1;
+                    if (next >= history.length) {
+                      setValue("");
+                      return null;
+                    }
+                    setValue(history[next] ?? "");
+                    return next;
+                  });
+                }
+              }}
+            />
+          </form>
+
+          <div className={styles.hint}>
+            Try: <code>about</code>, <code>projects</code>, <code>skills</code>, <code>life</code> — or{" "}
+            <code>help</code>. Use <code>↑</code>/<code>↓</code> for history.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Prompt() {
+  return (
+    <span className={styles.prompt} aria-hidden="true">
+      <span className={styles.promptUser}>alexandro</span>
+      <span className={styles.promptAt}>@</span>
+      <span className={styles.promptHost}>portfolio</span>
+      <span className={styles.promptColon}>:</span>
+      <span className={styles.promptPath}>~</span>
+      <span className={styles.promptSymbol}>$</span>
+      <span>&nbsp;</span>
+    </span>
+  );
+}
+
+export { AVAILABLE_COMMANDS };
+
+
