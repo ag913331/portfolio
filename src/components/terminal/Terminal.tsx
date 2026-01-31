@@ -43,6 +43,24 @@ function renderOutputLine(text: string, linkClassName: string) {
     );
   }
 
+  const credentialMatch = text.match(/^(\s*(?:\|\s*)?credential:\s*)(.+)$/i);
+  if (credentialMatch) {
+    const prefix = credentialMatch[1] ?? "";
+    const value = (credentialMatch[2] ?? "").trim();
+    const href = toHref(value);
+    if (href && !href.startsWith("mailto:")) {
+      return (
+        <>
+          {prefix}
+          <span aria-hidden="true" className={styles.terminalLinkSymbol}>🔗</span>
+          <a className={linkClassName} href={href} target="_blank" rel="noopener noreferrer">
+            Show credential
+          </a>
+        </>
+      );
+    }
+  }
+
   // Handles lines like: "  - GitHub: https://..." or "  - Email: foo@bar.com"
   const m = text.match(/^(\s*-\s*[^:]+:\s*)(.+)$/);
   if (m) {

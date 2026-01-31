@@ -129,6 +129,10 @@
   opacity: 0.25;
 }
 
+.terminalLinkSymbol {
+  margin-right: 4px;
+}
+
 .glow {
   pointer-events: none;
   position: absolute;
