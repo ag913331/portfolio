@@ -35,22 +35,62 @@ export function Terminal() {
 
   const [entries, setEntries] = useState<Entry[]>(() => [
     { kind: "output", id: makeId(), text: `Last login: ${formatLastLogin(bootDate)} on ttys001`, muted: true },
-    { kind: "input", id: makeId(), command: "system --init" },
-    ...TERMINAL_COMMANDS["system --init"].lines.map((l) => ({
-      kind: "output" as const,
-      id: makeId(),
-      text: l,
-    })),
     { kind: "output", id: makeId(), text: "" },
   ]);
 
   const [value, setValue] = useState("");
-  const [history, setHistory] = useState<string[]>(["system --init"]);
+  const [history, setHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState<number | null>(null);
+  const [isBooting, setIsBooting] = useState(true);
+  const [bootTyped, setBootTyped] = useState("");
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [entries.length]);
+
+  useEffect(() => {
+    // Animate the initial "system --init" as if typed, then print the boot output.
+    const bootCommand = "system --init";
+    const tickMs = 75;
+
+    let i = 0;
+    let cancelled = false;
+
+    setIsBooting(true);
+    setBootTyped("");
+
+    const t = window.setInterval(() => {
+      if (cancelled) return;
+      i += 1;
+      setBootTyped(bootCommand.slice(0, i));
+
+      if (i >= bootCommand.length) {
+        window.clearInterval(t);
+        if (cancelled) return;
+
+        setEntries((prev) => [
+          ...prev,
+          { kind: "input", id: makeId(), command: bootCommand },
+          ...TERMINAL_COMMANDS[bootCommand].lines.map((text) => ({
+            kind: "output" as const,
+            id: makeId(),
+            text,
+          })),
+          { kind: "output", id: makeId(), text: "" },
+        ]);
+
+        setHistory([bootCommand]);
+        setIsBooting(false);
+        setBootTyped("");
+        window.setTimeout(() => inputRef.current?.focus(), 0);
+      }
+    }, tickMs);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+  }, []);
 
   function focusInput() {
     inputRef.current?.focus();
@@ -129,6 +169,13 @@ export function Terminal() {
                 </span>
               );
             })}
+            {isBooting ? (
+              <span className={styles.line}>
+                <Prompt />
+                {bootTyped}
+                <span aria-hidden="true">▍</span>
+              </span>
+            ) : null}
             <div ref={bottomRef} />
           </div>
 
@@ -136,7 +183,7 @@ export function Terminal() {
             className={styles.promptRow}
             onSubmit={(ev) => {
               ev.preventDefault();
-              onSubmit();
+              if (!isBooting) onSubmit();
             }}
           >
             <label className={styles.srOnly} htmlFor="terminal-input">
@@ -148,12 +195,14 @@ export function Terminal() {
               ref={inputRef}
               className={styles.input}
               value={value}
+              disabled={isBooting}
               autoCapitalize="none"
               autoComplete="off"
               autoCorrect="off"
               spellCheck={false}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => {
+                if (isBooting) return;
                 if (e.key === "Enter") return;
 
                 if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
@@ -191,7 +240,7 @@ export function Terminal() {
           </form>
 
           <div className={styles.hint}>
-            Try: <code>about</code>, <code>projects</code>, <code>skills</code>, <code>life</code> — or{" "}
+            Try: <code>whoami</code>, <code>projects</code>, <code>skills</code>, <code>life</code> — or{" "}
             <code>help</code>. Use <code>↑</code>/<code>↓</code> for history.
           </div>
         </div>

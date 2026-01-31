@@ -6,7 +6,7 @@ export type TerminalCommands = Record<string, TerminalCommandResult>;
 
 export const AVAILABLE_COMMANDS = [
   "system --init",
-  "about",
+  "whoami",
   "skills",
   "projects",
   "life",
@@ -26,7 +26,7 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "Kernel: v5.15.0-generic",
       "",
       "Available commands:",
-      "  → about",
+      "  → whoami",
       "  → skills",
       "  → projects",
       "  → life",
@@ -35,9 +35,9 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "Tip: type 'help' to list commands.",
     ],
   },
-  about: {
+  whoami: {
     lines: [
-      "Hi, I'm <Your Name>.",
+      "Hi, I'm Alexandro Georgiev.",
       "Full‑stack engineer with a DevOps + Linux administration background.",
       "",
       "I build production systems end‑to‑end: apps, infra, CI/CD, observability, and security.",
