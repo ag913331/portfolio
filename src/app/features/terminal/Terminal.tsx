@@ -1,302 +1,30 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "@/app/utils/commands";
-import { toHref, parseQuotedJsonValueLine, formatLastLogin, makeId } from "@/app/utils/helpers";
-import { PRIVATE_PROJECT_DESCRIPTIONS, LIFE_PROMPT_LINE, TERMS_TEXT } from "@/app/utils/constants";
-import { Prompt } from "../prompt/Prompt";
+import { LIFE_PROMPT_LINE, TERMS_TEXT } from "@/app/utils/constants";
+import { useTerminalController } from "@/app/features/terminal/hooks";
+import { createTerminalRenderers } from "@/app/features/terminal/renderers";
+import { Prompt } from "@/app/features/prompt/Prompt";
+
 import styles from "./Terminal.module.css";
 
-function renderOutputLine(text: string, linkClassName: string) {
-  if (text.trimStart().startsWith("★")) {
-    return <span className={styles.sectionHeader}>{text}</span>;
-  }
-
-  if (text.startsWith("o-------->")) {
-    return <span className={styles.experiencePosition}>{text}</span>;
-  }
-
-  const periodMatch = text.match(/^(\|\s*period:\s*)(.+)$/);
-  if (periodMatch) {
-    const prefix = periodMatch[1] ?? "";
-    const value = (periodMatch[2] ?? "").trim();
-    const isCurrent = value === "Nov 2024 - Current";
-    return (
-      <>
-        {prefix}
-        <span className={isCurrent ? styles.experiencePeriodCurrent : styles.experiencePeriod}>{value}</span>
-      </>
-    );
-  }
-
-  const credentialMatch = text.match(/^(\s*(?:\|\s*)?credential:\s*)(.+)$/i);
-  if (credentialMatch) {
-    const prefix = credentialMatch[1] ?? "";
-    const value = (credentialMatch[2] ?? "").trim();
-    const href = toHref(value);
-    if (href && !href.startsWith("mailto:")) {
-      return (
-        <>
-          {prefix}
-          <span aria-hidden="true" className={styles.terminalLinkSymbol}>🔗</span>
-          <a className={linkClassName} href={href} target="_blank" rel="noopener noreferrer">
-            Show credential
-          </a>
-        </>
-      );
-    }
-  }
-
-  // Handles lines like: "  - GitHub: https://..." or "  - Email: foo@bar.com"
-  const m = text.match(/^(\s*-\s*[^:]+:\s*)(.+)$/);
-  if (m) {
-    const prefix = m[1] ?? "";
-    const value = (m[2] ?? "").trim();
-    const href = toHref(value);
-
-    if (href) {
-      const isMail = href.startsWith("mailto:");
-      return (
-        <>
-          {prefix}
-          <a
-            className={linkClassName}
-            href={href}
-            target={isMail ? undefined : "_blank"}
-            rel={isMail ? undefined : "noopener noreferrer"}
-          >
-            {value}
-          </a>
-        </>
-      );
-    }
-  }
-
-  // Fallback: if the entire line is a URL.
-  const href = toHref(text);
-  if (href) {
-    const isMail = href.startsWith("mailto:");
-    return (
-      <a
-        className={linkClassName}
-        href={href}
-        target={isMail ? undefined : "_blank"}
-        rel={isMail ? undefined : "noopener noreferrer"}
-      >
-        {text}
-      </a>
-    );
-  }
-
-  return text;
-}
-
 export function Terminal({ onClose }: { onClose?: () => void }) {
-  const router = useRouter();
-  const bootDate = useMemo(() => new Date(), []);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-  const vimInputRef = useRef<HTMLInputElement | null>(null);
+  const c = useTerminalController({ onClose });
 
-  const [entries, setEntries] = useState<Entry[]>(() => [
-    { kind: "output", id: makeId(), text: `Last login: ${formatLastLogin(bootDate)} on ttys001`, muted: true },
-    { kind: "output", id: makeId(), text: "" },
-  ]);
-
-  const [value, setValue] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
-  const [_, setHistoryIdx] = useState<number | null>(null);
-  const [isBooting, setIsBooting] = useState(true);
-  const [bootTyped, setBootTyped] = useState("");
-  const [isMaximized, setIsMaximized] = useState(false);
-  const [lifeFlow, setLifeFlow] = useState<LifeFlowState>({ mode: "idle" });
-  const [vimCommand, setVimCommand] = useState("");
-
-  const suggestion = useMemo(() => {
-    const q = value.trim();
-    if (!q) return null;
-
-    const match = AVAILABLE_COMMANDS.find((c) => c.startsWith(q));
-    if (!match || match === q) return null;
-    return match;
-  }, [value]);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [entries.length]);
-
-  useEffect(() => {
-    if (lifeFlow.mode === "show_terms") {
-      window.setTimeout(() => vimInputRef.current?.focus(), 0);
-    }
-  }, [lifeFlow.mode]);
-
-  useEffect(() => {
-    // Animate the initial "system --init" as if typed, then print the boot output.
-    const bootCommand = "system --init";
-    const tickMs = 75;
-
-    let i = 0;
-    let cancelled = false;
-
-    setIsBooting(true);
-    setBootTyped("");
-
-    const t = window.setInterval(() => {
-      if (cancelled) return;
-      i += 1;
-      setBootTyped(bootCommand.slice(0, i));
-
-      if (i >= bootCommand.length) {
-        window.clearInterval(t);
-        if (cancelled) return;
-
-        setEntries((prev) => [
-          ...prev,
-          { kind: "input", id: makeId(), command: bootCommand },
-          ...TERMINAL_COMMANDS[bootCommand].lines.map((text) => ({
-            kind: "output" as const,
-            id: makeId(),
-            text,
-          })),
-          { kind: "output", id: makeId(), text: "" },
-        ]);
-
-        setHistory([bootCommand]);
-        setIsBooting(false);
-        setBootTyped("");
-        window.setTimeout(() => inputRef.current?.focus(), 0);
-      }
-    }, tickMs);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(t);
-    };
-  }, []);
-
-  function focusInput() {
-    inputRef.current?.focus();
-  }
-
-  function pushOutput(lines: string[], muted?: boolean) {
-    setEntries((prev) => [
-      ...prev,
-      ...lines.map((text) => ({ kind: "output" as const, id: makeId(), text, muted })),
-    ]);
-  }
-
-  
-
-  function showPrivateProject(title: string) {
-    const lines = PRIVATE_PROJECT_DESCRIPTIONS[title];
-    if (!lines) return;
-    pushOutput(["", ...lines]);
-    window.setTimeout(() => inputRef.current?.focus(), 0);
-  }
-
-  function runCommand(raw: string) {
-    const command = raw.trim();
-    if (!command) {
-      if (lifeFlow.mode === "awaiting_consent") {
-        // Default for Y/n is "Yes", but only after terms were viewed.
-        if (!lifeFlow.termsViewed) {
-          pushOutput(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
-          return;
-        }
-        pushOutput(["Opening /life ..."], true);
-        setLifeFlow({ mode: "idle" });
-        router.push("/life");
-      }
-      return;
-    }
-
-    setEntries((prev) => [...prev, { kind: "input", id: makeId(), command }]);
-    setHistory((prev) => (prev[prev.length - 1] === command ? prev : [...prev, command]));
-    setHistoryIdx(null);
-
-    if (lifeFlow.mode === "awaiting_consent") {
-      const normalized = command.toLowerCase();
-      const isYes = normalized === "y" || normalized === "yes";
-      const isNo = normalized === "n" || normalized === "no";
-
-      if (!isYes && !isNo) {
-        pushOutput(["Please answer with Y or n."], true);
-        return;
-      }
-
-      if (isNo) {
-        pushOutput(["Aborted."], true);
-        setLifeFlow({ mode: "idle" });
-        return;
-      }
-
-      if (!lifeFlow.termsViewed) {
-        pushOutput(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
-        return;
-      }
-
-      pushOutput(["Opening /life ..."], true);
-      setLifeFlow({ mode: "idle" });
-      router.push("/life");
-      return;
-    }
-
-    if (command === "exit") {
-      onClose?.();
-      return;
-    }
-
-    if (command === "clear") {
-      setEntries([{ kind: "output", id: makeId(), text: "" }]);
-      return;
-    }
-
-    if (command === "download") {
-      pushOutput(["Downloading cv.pdf ..."], true);
-      const a = document.createElement("a");
-      a.href = "/cv.pdf";
-      a.download = "cv.pdf";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      return;
-    }
-
-    if (command === "life") {
-      pushOutput([LIFE_PROMPT_LINE, ""], true);
-      setLifeFlow({ mode: "awaiting_consent", termsViewed: false });
-      return;
-    }
-
-    if (command === "help") {
-      pushOutput(TERMINAL_COMMANDS.help.lines);
-      return;
-    }
-
-    const exact = TERMINAL_COMMANDS[command];
-    if (exact) {
-      pushOutput(exact.lines);
-      return;
-    }
-
-    pushOutput([`Command not found: ${command}`, "Type 'help' to list available commands."], true);
-  }
-
-  function onSubmit() {
-    const cmd = value;
-    setValue("");
-    runCommand(cmd);
-  }
-
-  let degreeIdx = 0;
+  const { renderOutputEntry } = createTerminalRenderers(
+    styles,
+    {
+      onTermsClick: c.onTermsClick,
+      onShowPrivateProject: c.showPrivateProject,
+      onShowNdaDetails: () => c.showPrivateProject("Private project (NDA)"),
+      getDegreeClass: (idx) => (idx === 1 ? styles.degree1 : idx === 2 ? styles.degree2 : styles.degree3),
+    },
+    LIFE_PROMPT_LINE,
+  );
 
   return (
-    <div className={`${styles.wrap} ${isMaximized ? styles.wrapMax : ""}`} onMouseDown={focusInput}>
+    <div className={`${styles.wrap} ${c.isMaximized ? styles.wrapMax : ""}`} onMouseDown={c.focusInput}>
       <div
-        className={`${styles.window} ${isMaximized ? styles.windowMax : ""}`}
+        className={`${styles.window} ${c.isMaximized ? styles.windowMax : ""}`}
         role="application"
         aria-label="Portfolio terminal"
       >
@@ -311,7 +39,7 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
               aria-label="Close terminal"
               title="Close terminal"
               onClick={() => {
-                onClose?.();
+                c.closeTerminal?.();
               }}
             >
               <span className={`${styles.dot} ${styles.dotRed}`} />
@@ -322,8 +50,8 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
               className={styles.dotButton}
               aria-label="Restore size"
               title="Restore size"
-              disabled={!isMaximized}
-              onClick={() => setIsMaximized(false)}
+              disabled={!c.isMaximized}
+              onClick={() => c.setIsMaximized(false)}
             >
               <span className={`${styles.dot} ${styles.dotYellow}`} />
             </button>
@@ -333,8 +61,8 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
               className={styles.dotButton}
               aria-label="Maximize"
               title="Maximize"
-              disabled={isMaximized}
-              onClick={() => setIsMaximized(true)}
+              disabled={c.isMaximized}
+              onClick={() => c.setIsMaximized(true)}
             >
               <span className={`${styles.dot} ${styles.dotGreen}`} />
             </button>
@@ -342,112 +70,10 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
           <div className={styles.title}>alexandro@localhost:~</div>
         </div>
 
-        <div className={`${styles.screen} ${isMaximized ? styles.screenMax : ""}`}>
+        <div className={`${styles.screen} ${c.isMaximized ? styles.screenMax : ""}`}>
           <div className={styles.output} aria-live="polite">
-            {entries.map((e) => {
-              if (e.kind === "output") {
-                if (e.text === LIFE_PROMPT_LINE) {
-                  const needle = "terms and conditions";
-                  const idx = e.text.indexOf(needle);
-                  const before = idx >= 0 ? e.text.slice(0, idx) : e.text;
-                  const after = idx >= 0 ? e.text.slice(idx + needle.length) : "";
-                  return (
-                    <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
-                      {before}
-                      {idx >= 0 ? (
-                        <button
-                          type="button"
-                          className={styles.terminalActionButton}
-                          onClick={() => {
-                            setLifeFlow({ mode: "show_terms" });
-                          }}
-                        >
-                          {needle}
-                        </button>
-                      ) : null}
-                      {after}
-                    </span>
-                  );
-                }
-
-                if (!e.muted && e.text.startsWith("Status:")) {
-                  const value = e.text.slice("Status:".length).trim();
-                  return (
-                    <span key={e.id} className={styles.line}>
-                      <span>Status:&nbsp;</span>
-                      <span className={styles.statusValue}>{value}</span>
-                    </span>
-                  );
-                }
-
-                const privateProjectMatch = e.text.match(/^\s*-\s*(.+?)\s+—\s+Show project description\s*$/i);
-                if (!e.muted && privateProjectMatch) {
-                  const title = (privateProjectMatch[1] ?? "").trim();
-                  return (
-                    <span key={e.id} className={styles.line}>
-                      {"  - "}
-                      {title}
-                      {" — "}
-                      <button
-                        type="button"
-                        className={styles.terminalActionButton}
-                        onClick={() => showPrivateProject(title)}
-                      >
-                        Show project description
-                      </button>
-                    </span>
-                  );
-                }
-
-                const ndaDetailsMatch = e.text.match(/^Private \(NDA\):\s*Details\s*$/i);
-                if (!e.muted && ndaDetailsMatch) {
-                  return (
-                    <span key={e.id} className={styles.line}>
-                      {"Private (NDA): "}
-                      <button
-                        type="button"
-                        className={styles.terminalActionButton}
-                        onClick={() => showPrivateProject("Private project (NDA)")}
-                      >
-                        Details
-                      </button>
-                    </span>
-                  );
-                }
-
-                const parsed = parseQuotedJsonValueLine(e.text);
-                if (!e.muted && parsed) {
-                  if (parsed.key === "degree") degreeIdx += 1;
-                  const degreeClass =
-                    parsed.key === "degree"
-                      ? degreeIdx === 1
-                        ? styles.degree1
-                        : degreeIdx === 2
-                          ? styles.degree2
-                          : degreeIdx === 3
-                            ? styles.degree3
-                            : ""
-                      : "";
-
-                  const valueClass =
-                    parsed.key === "institution" ? styles.institutionValue : degreeClass || undefined;
-
-                  return (
-                    <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
-                      {parsed.prefix}
-                      <span className={valueClass}>{parsed.value}</span>
-                      {parsed.suffix}
-                    </span>
-                  );
-                }
-
-                return (
-                  <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
-                    {renderOutputLine(e.text, styles.terminalLink)}
-                  </span>
-                );
-              }
-
+            {c.entries.map((e) => {
+              if (e.kind === "output") return renderOutputEntry(e);
               return (
                 <span key={e.id} className={styles.line}>
                   <Prompt />
@@ -455,21 +81,22 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
                 </span>
               );
             })}
-            {isBooting ? (
+
+            {c.isBooting ? (
               <span className={styles.line}>
                 <Prompt />
-                {bootTyped}
+                {c.bootTyped}
                 <span aria-hidden="true">▍</span>
               </span>
             ) : null}
-            <div ref={bottomRef} />
+            <div ref={c.bottomRef} />
           </div>
 
           <form
             className={styles.promptRow}
             onSubmit={(ev) => {
               ev.preventDefault();
-              if (!isBooting && lifeFlow.mode !== "show_terms") onSubmit();
+              if (!c.isBooting && !c.isOverlayOpen) c.onSubmit();
             }}
           >
             <label className={styles.srOnly} htmlFor="terminal-input">
@@ -478,70 +105,27 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
             <Prompt />
             <div className={styles.inputWrap}>
               <div className={styles.ghost} aria-hidden="true">
-                {suggestion ? (
+                {c.suggestion ? (
                   <>
-                    <span className={styles.ghostTyped}>{value}</span>
-                    <span className={styles.ghostRemainder}>{suggestion.slice(value.trim().length)}</span>
+                    <span className={styles.ghostTyped}>{c.value}</span>
+                    <span className={styles.ghostRemainder}>{c.suggestion.slice(c.value.trim().length)}</span>
                   </>
                 ) : (
-                  <span className={styles.ghostTyped}>{value}</span>
+                  <span className={styles.ghostTyped}>{c.value}</span>
                 )}
               </div>
               <input
                 id="terminal-input"
-                ref={inputRef}
+                ref={c.inputRef}
                 className={styles.input}
-                value={value}
-                disabled={isBooting || lifeFlow.mode === "show_terms"}
+                value={c.value}
+                disabled={c.isBooting || c.isOverlayOpen}
                 autoCapitalize="none"
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck={false}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (isBooting || lifeFlow.mode === "show_terms") return;
-
-                  if (e.key === "Tab") {
-                    if (suggestion) {
-                      e.preventDefault();
-                      setValue(suggestion);
-                    }
-                    return;
-                  }
-
-                  if (e.key === "Enter") return;
-
-                  if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
-                    e.preventDefault();
-                    setValue("");
-                    runCommand("clear");
-                    return;
-                  }
-
-                  if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    setHistoryIdx((prev) => {
-                      const next = prev === null ? history.length - 1 : Math.max(0, prev - 1);
-                      setValue(history[next] ?? "");
-                      return next;
-                    });
-                    return;
-                  }
-
-                  if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    setHistoryIdx((prev) => {
-                      if (prev === null) return null;
-                      const next = prev + 1;
-                      if (next >= history.length) {
-                        setValue("");
-                        return null;
-                      }
-                      setValue(history[next] ?? "");
-                      return next;
-                    });
-                  }
-                }}
+                onChange={(e) => c.setValue(e.target.value)}
+                onKeyDown={c.onTerminalKeyDown}
               />
             </div>
           </form>
@@ -552,7 +136,7 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
           </div>
         </div>
 
-        {lifeFlow.mode === "show_terms" ? (
+        {c.lifeFlow.mode === "show_terms" ? (
           <div className={styles.overlayBackdrop} role="dialog" aria-modal="true">
             <div className={styles.vimWindow}>
               <div className={styles.vimHeader}>
@@ -567,23 +151,17 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
                 className={styles.vimFooter}
                 onSubmit={(ev) => {
                   ev.preventDefault();
-                  const cmd = vimCommand.trim();
-                  if (cmd === ":q") {
-                    setVimCommand("");
-                    setLifeFlow({ mode: "awaiting_consent", termsViewed: true });
-                    pushOutput(["Terms closed. Continue? Y/n"], true);
-                    window.setTimeout(() => inputRef.current?.focus(), 0);
-                  }
+                  c.onVimSubmit();
                 }}
               >
                 <span className={styles.vimPrompt} aria-hidden="true">
                   :
                 </span>
                 <input
-                  ref={vimInputRef}
+                  ref={c.vimInputRef}
                   className={styles.vimInput}
-                  value={vimCommand}
-                  onChange={(e) => setVimCommand(e.target.value)}
+                  value={c.vimCommand}
+                  onChange={(e) => c.setVimCommand(e.target.value)}
                   autoCapitalize="none"
                   autoComplete="off"
                   autoCorrect="off"
@@ -598,7 +176,3 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
     </div>
   );
 }
-
-export { AVAILABLE_COMMANDS };
-
-
