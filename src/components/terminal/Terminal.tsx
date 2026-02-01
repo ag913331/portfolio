@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./Terminal.module.css";
 import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "./commands";
 
 type Entry =
   | { kind: "output"; id: string; text: string; muted?: boolean }
   | { kind: "input"; id: string; command: string };
+
+type LifeFlowState =
+  | { mode: "idle" }
+  | { mode: "awaiting_consent"; termsViewed: boolean }
+  | { mode: "show_terms" };
 
 function toHref(raw: string) {
   const trimmed = raw.trim();
@@ -139,9 +145,11 @@ function makeId() {
 }
 
 export function Terminal({ onClose }: { onClose?: () => void }) {
+  const router = useRouter();
   const bootDate = useMemo(() => new Date(), []);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const vimInputRef = useRef<HTMLInputElement | null>(null);
 
   const [entries, setEntries] = useState<Entry[]>(() => [
     { kind: "output", id: makeId(), text: `Last login: ${formatLastLogin(bootDate)} on ttys001`, muted: true },
@@ -154,6 +162,8 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
   const [isBooting, setIsBooting] = useState(true);
   const [bootTyped, setBootTyped] = useState("");
   const [isMaximized, setIsMaximized] = useState(false);
+  const [lifeFlow, setLifeFlow] = useState<LifeFlowState>({ mode: "idle" });
+  const [vimCommand, setVimCommand] = useState("");
 
   const suggestion = useMemo(() => {
     const q = value.trim();
@@ -167,6 +177,12 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [entries.length]);
+
+  useEffect(() => {
+    if (lifeFlow.mode === "show_terms") {
+      window.setTimeout(() => vimInputRef.current?.focus(), 0);
+    }
+  }, [lifeFlow.mode]);
 
   useEffect(() => {
     // Animate the initial "system --init" as if typed, then print the boot output.
@@ -222,6 +238,23 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
       ...lines.map((text) => ({ kind: "output" as const, id: makeId(), text, muted })),
     ]);
   }
+
+  const LIFE_PROMPT_LINE =
+    "You are about to see some amazing pictures of me. Please accept terms and conditions first.";
+
+  const TERMS_TEXT: string[] = [
+    "TERMS AND CONDITIONS — LIFE MODE",
+    "",
+    "By continuing, you agree to the following:",
+    "",
+    "1) The content shown under the 'life' section may include personal photos and information.",
+    "2) These pictures may NOT be downloaded, redistributed, or used in any form without explicit permission.",
+    "3) No scraping, mirroring, or automated collection of the content is allowed.",
+    "",
+    "If you'd like to share anything, please ask first. Thanks :)",
+    "",
+    "Press :q to quit.",
+  ];
 
   const privateProjectDescriptions: Record<string, string[]> = {
     "Insurance Product Modeling Platform": [
@@ -279,11 +312,50 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
 
   function runCommand(raw: string) {
     const command = raw.trim();
-    if (!command) return;
+    if (!command) {
+      if (lifeFlow.mode === "awaiting_consent") {
+        // Default for Y/n is "Yes", but only after terms were viewed.
+        if (!lifeFlow.termsViewed) {
+          pushOutput(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
+          return;
+        }
+        pushOutput(["Opening /life ..."], true);
+        setLifeFlow({ mode: "idle" });
+        router.push("/life");
+      }
+      return;
+    }
 
     setEntries((prev) => [...prev, { kind: "input", id: makeId(), command }]);
     setHistory((prev) => (prev[prev.length - 1] === command ? prev : [...prev, command]));
     setHistoryIdx(null);
+
+    if (lifeFlow.mode === "awaiting_consent") {
+      const normalized = command.toLowerCase();
+      const isYes = normalized === "y" || normalized === "yes";
+      const isNo = normalized === "n" || normalized === "no";
+
+      if (!isYes && !isNo) {
+        pushOutput(["Please answer with Y or n."], true);
+        return;
+      }
+
+      if (isNo) {
+        pushOutput(["Aborted."], true);
+        setLifeFlow({ mode: "idle" });
+        return;
+      }
+
+      if (!lifeFlow.termsViewed) {
+        pushOutput(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
+        return;
+      }
+
+      pushOutput(["Opening /life ..."], true);
+      setLifeFlow({ mode: "idle" });
+      router.push("/life");
+      return;
+    }
 
     if (command === "exit") {
       onClose?.();
@@ -292,6 +364,12 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
 
     if (command === "clear") {
       setEntries([{ kind: "output", id: makeId(), text: "" }]);
+      return;
+    }
+
+    if (command === "life") {
+      pushOutput([LIFE_PROMPT_LINE, ""], true);
+      setLifeFlow({ mode: "awaiting_consent", termsViewed: false });
       return;
     }
 
@@ -370,6 +448,30 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
           <div className={styles.output} aria-live="polite">
             {entries.map((e) => {
               if (e.kind === "output") {
+                if (e.text === LIFE_PROMPT_LINE) {
+                  const needle = "terms and conditions";
+                  const idx = e.text.indexOf(needle);
+                  const before = idx >= 0 ? e.text.slice(0, idx) : e.text;
+                  const after = idx >= 0 ? e.text.slice(idx + needle.length) : "";
+                  return (
+                    <span key={e.id} className={`${styles.line} ${e.muted ? styles.muted : ""}`}>
+                      {before}
+                      {idx >= 0 ? (
+                        <button
+                          type="button"
+                          className={styles.terminalActionButton}
+                          onClick={() => {
+                            setLifeFlow({ mode: "show_terms" });
+                          }}
+                        >
+                          {needle}
+                        </button>
+                      ) : null}
+                      {after}
+                    </span>
+                  );
+                }
+
                 if (!e.muted && e.text.startsWith("Status:")) {
                   const value = e.text.slice("Status:".length).trim();
                   return (
@@ -469,7 +571,7 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
             className={styles.promptRow}
             onSubmit={(ev) => {
               ev.preventDefault();
-              if (!isBooting) onSubmit();
+              if (!isBooting && lifeFlow.mode !== "show_terms") onSubmit();
             }}
           >
             <label className={styles.srOnly} htmlFor="terminal-input">
@@ -492,14 +594,14 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
                 ref={inputRef}
                 className={styles.input}
                 value={value}
-                disabled={isBooting}
+                disabled={isBooting || lifeFlow.mode === "show_terms"}
                 autoCapitalize="none"
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck={false}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={(e) => {
-                  if (isBooting) return;
+                  if (isBooting || lifeFlow.mode === "show_terms") return;
 
                   if (e.key === "Tab") {
                     if (suggestion) {
@@ -551,6 +653,49 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
             <code>help</code>. Use <code>↑</code>/<code>↓</code> for history.
           </div>
         </div>
+
+        {lifeFlow.mode === "show_terms" ? (
+          <div className={styles.overlayBackdrop} role="dialog" aria-modal="true">
+            <div className={styles.vimWindow}>
+              <div className={styles.vimHeader}>
+                vim — terms-and-conditions
+              </div>
+
+              <div className={styles.vimBody}>
+                <pre className={styles.vimText}>{TERMS_TEXT.join("\n")}</pre>
+              </div>
+
+              <form
+                className={styles.vimFooter}
+                onSubmit={(ev) => {
+                  ev.preventDefault();
+                  const cmd = vimCommand.trim();
+                  if (cmd === ":q") {
+                    setVimCommand("");
+                    setLifeFlow({ mode: "awaiting_consent", termsViewed: true });
+                    pushOutput(["Terms closed. Continue? Y/n"], true);
+                    window.setTimeout(() => inputRef.current?.focus(), 0);
+                  }
+                }}
+              >
+                <span className={styles.vimPrompt} aria-hidden="true">
+                  :
+                </span>
+                <input
+                  ref={vimInputRef}
+                  className={styles.vimInput}
+                  value={vimCommand}
+                  onChange={(e) => setVimCommand(e.target.value)}
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  placeholder="q to quit"
+                />
+              </form>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
