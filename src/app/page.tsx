@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
-import { Terminal } from "@/components/terminal/Terminal";
+import { Terminal } from "@/app/components/terminal/Terminal";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(true);

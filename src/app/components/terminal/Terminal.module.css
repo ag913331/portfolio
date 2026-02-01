@@ -307,32 +307,6 @@
   margin-top: 10px;
 }
 
-.prompt {
-  display: inline-flex;
-  gap: 0;
-  white-space: nowrap;
-  user-select: none;
-}
-
-.promptUser {
-  color: rgba(34, 197, 94, 0.95);
-}
-
-.promptAt,
-.promptHost,
-.promptColon {
-  color: rgba(226, 232, 240, 0.75);
-}
-
-.promptPath {
-  color: rgba(56, 189, 248, 0.95);
-}
-
-.promptSymbol {
-  color: rgba(226, 232, 240, 0.92);
-  margin-left: 6px;
-}
-
 .inputWrap {
   position: relative;
   flex: 1;

@@ -2,30 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "@/app/utils/commands";
+import { toHref, parseQuotedJsonValueLine, formatLastLogin, makeId } from "@/app/utils/helpers";
+import { PRIVATE_PROJECT_DESCRIPTIONS, LIFE_PROMPT_LINE, TERMS_TEXT } from "@/app/utils/constants";
+import { Prompt } from "../prompt/Prompt";
 import styles from "./Terminal.module.css";
-import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "./commands";
-
-type Entry =
-  | { kind: "output"; id: string; text: string; muted?: boolean }
-  | { kind: "input"; id: string; command: string };
-
-type LifeFlowState =
-  | { mode: "idle" }
-  | { mode: "awaiting_consent"; termsViewed: boolean }
-  | { mode: "show_terms" };
-
-function toHref(raw: string) {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-
-  if (trimmed.includes("@") && !trimmed.includes("://") && !trimmed.startsWith("www.")) {
-    return `mailto:${trimmed}`;
-  }
-
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
-  if (trimmed.startsWith("www.")) return `https://${trimmed}`;
-  return null;
-}
 
 function renderOutputLine(text: string, linkClassName: string) {
   if (text.trimStart().startsWith("★")) {
@@ -111,39 +92,6 @@ function renderOutputLine(text: string, linkClassName: string) {
   return text;
 }
 
-function parseQuotedJsonValueLine(text: string) {
-  // Matches lines like: '  "institution": "Some School",'
-  // Captures prefix up to opening quote of the value, the value itself, and suffix (closing quote + comma/etc).
-  const m = text.match(/^(\s*"(institution|degree)"\s*:\s*")([^"]*)(".*)$/);
-  if (!m) return null;
-
-  const key = (m[2] ?? "") as "institution" | "degree";
-  const prefix = m[1] ?? "";
-  const value = m[3] ?? "";
-  const suffix = m[4] ?? "";
-  return { key, prefix, value, suffix };
-}
-
-function formatLastLogin(d: Date) {
-  // Example: Sat Jan 31 09:41:02
-  const parts = new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }).formatToParts(d);
-
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
-  return `${get("weekday")} ${get("month")} ${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
-}
-
-function makeId() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
 export function Terminal({ onClose }: { onClose?: () => void }) {
   const router = useRouter();
   const bootDate = useMemo(() => new Date(), []);
@@ -158,7 +106,7 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
 
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<string[]>([]);
-  const [historyIdx, setHistoryIdx] = useState<number | null>(null);
+  const [_, setHistoryIdx] = useState<number | null>(null);
   const [isBooting, setIsBooting] = useState(true);
   const [bootTyped, setBootTyped] = useState("");
   const [isMaximized, setIsMaximized] = useState(false);
@@ -239,72 +187,10 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
     ]);
   }
 
-  const LIFE_PROMPT_LINE =
-    "You are about to see some amazing pictures of me. Please accept terms and conditions first.";
-
-  const TERMS_TEXT: string[] = [
-    "TERMS AND CONDITIONS — LIFE MODE",
-    "",
-    "By continuing, you agree to the following:",
-    "",
-    "1) The content shown under the 'life' section may include personal photos and information.",
-    "2) These pictures may NOT be downloaded, redistributed, or used in any form without explicit permission.",
-    "3) No scraping, mirroring, or automated collection of the content is allowed.",
-    "",
-    "If you'd like to share anything, please ask first. Thanks :)",
-    "",
-    "Press :q to quit.",
-  ];
-
-  const privateProjectDescriptions: Record<string, string[]> = {
-    "Insurance Product Modeling Platform": [
-      " ",
-      "Insurance Product Modeling Platform (private / NDA)",
-      "",
-      "This project focused on developing a robust application designed to facilitate the creation of core insurance models and subsequent insurance products.",
-      "It encompassed multiple components, including an API, a dashboard for product creation, and a customer-facing website for accessing the final products.",
-      "",
-      "★ Duration: ~12 months",
-      "★ Collaborators (teams): Dev, Management, Marketing, Sales",
-      "★ Responsibilities:",
-      "  (1) Led development of a comprehensive dashboard enabling departments to create/manage core insurance models and products via the API.",
-      "  (2) Collaborated on API development to ensure seamless integration and functionality.",
-      "  (3) Ensured the dashboard supported efficient product creation and listing on the customer-facing website.",
-      "★ Impact:",
-      "  Positioned us among the top companies selling insurance products in the country by streamlining product creation and expanding offerings to meet customer needs.",
-      "",
-      "Note: Source code and deeper implementation details are private due to NDA.",
-    ],
-    "Automated Server OS Upgrade": [
-      " ",
-      "Automated Server OS Upgrade (private / NDA)",
-      "",
-      "This project automated the deployment and upgrade process of Ubuntu servers end-to-end.",
-      "The solution included building an unattended installation image, connecting servers to IPMI, and scripting the full upgrade workflow.",
-      "",
-      "★ Duration: ~4 months",
-      "★ Collaborators (teams): Tech, Data, Algo, DevOps, Traders",
-      "★ Responsibilities:",
-      "  (1) Coordinated with stakeholders to ensure upgrades didn't disrupt ongoing operations.",
-      "  (2) Communicated with teams/management to gather requirements, address concerns, and schedule implementation.",
-      "  (3) Bridged technical and non-technical teams to streamline the process and reduce disruption risk.",
-      "  (4) Built an autoinstall Ubuntu image for unattended installations.",
-      "  (5) Implemented a script to automate backups, image insertion via Redfish API, installation monitoring, system checks, network restore, and package setup.",
-      "★ Impact:",
-      "  Reduced manual effort/time, ensured consistent installs, minimized downtime, and improved overall system efficiency.",
-      "",
-      "Note: Source code and deeper implementation details are private due to NDA.",
-    ],
-    "Private project (NDA)": [
-      "Private project (NDA)",
-      "",
-      "I’ve worked on additional large projects that are under non-disclosure agreements.",
-      "I can discuss high-level responsibilities and outcomes in private, but cannot disclose code or sensitive details here.",
-    ],
-  };
+  
 
   function showPrivateProject(title: string) {
-    const lines = privateProjectDescriptions[title];
+    const lines = PRIVATE_PROJECT_DESCRIPTIONS[title];
     if (!lines) return;
     pushOutput(["", ...lines]);
     window.setTimeout(() => inputRef.current?.focus(), 0);
@@ -710,20 +596,6 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
         ) : null}
       </div>
     </div>
-  );
-}
-
-function Prompt() {
-  return (
-    <span className={styles.prompt} aria-hidden="true">
-      <span className={styles.promptUser}>alexandro</span>
-      <span className={styles.promptAt}>@</span>
-      <span className={styles.promptHost}>localhost</span>
-      <span className={styles.promptColon}>:</span>
-      <span className={styles.promptPath}>~</span>
-      <span className={styles.promptSymbol}>$</span>
-      <span>&nbsp;</span>
-    </span>
   );
 }
 

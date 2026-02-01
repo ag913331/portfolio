@@ -1,11 +1,4 @@
-export type TerminalCommandResult = {
-  lines: string[];
-};
-
-export type TerminalCommands = Record<string, TerminalCommandResult>;
-
 export const AVAILABLE_COMMANDS = [
-  // Keep whoami first (quickest intro), but still include ALL commands for Tab autocomplete + help.
   "whoami",
   "certifications",
   "contacts",
