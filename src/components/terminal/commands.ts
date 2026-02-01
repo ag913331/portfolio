@@ -11,6 +11,7 @@ export const AVAILABLE_COMMANDS = [
   "exit",
   "experience",
   "help",
+  "languages",
   "life",
   "projects",
   "skills",
@@ -34,6 +35,7 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "  → contacts",
       "  → education",
       "  → experience",
+      "  → languages",
       "  → life",
       "  → projects",
       "  → skills",
@@ -136,6 +138,15 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "         }",
       "     ]",
       "}",
+    ],
+  },
+  languages: {
+    lines: [
+      "Languages:",
+      "  - Bulgarian — Native or bilingual proficiency",
+      "  - English — Full professional proficiency",
+      "  - Romanian — Native or bilingual proficiency",
+      "  - Russian — Professional working proficiency",
     ],
   },
   experience: {
