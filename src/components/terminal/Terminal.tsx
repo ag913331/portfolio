@@ -223,6 +223,60 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
     ]);
   }
 
+  const privateProjectDescriptions: Record<string, string[]> = {
+    "Insurance Product Modeling Platform": [
+      " ",
+      "Insurance Product Modeling Platform (private / NDA)",
+      "",
+      "This project focused on developing a robust application designed to facilitate the creation of core insurance models and subsequent insurance products.",
+      "It encompassed multiple components, including an API, a dashboard for product creation, and a customer-facing website for accessing the final products.",
+      "",
+      "★ Duration: ~12 months",
+      "★ Collaborators (teams): Dev, Management, Marketing, Sales",
+      "★ Responsibilities:",
+      "  (1) Led development of a comprehensive dashboard enabling departments to create/manage core insurance models and products via the API.",
+      "  (2) Collaborated on API development to ensure seamless integration and functionality.",
+      "  (3) Ensured the dashboard supported efficient product creation and listing on the customer-facing website.",
+      "★ Impact:",
+      "  Positioned us among the top companies selling insurance products in the country by streamlining product creation and expanding offerings to meet customer needs.",
+      "",
+      "Note: Source code and deeper implementation details are private due to NDA.",
+    ],
+    "Automated Server OS Upgrade": [
+      " ",
+      "Automated Server OS Upgrade (private / NDA)",
+      "",
+      "This project automated the deployment and upgrade process of Ubuntu servers end-to-end.",
+      "The solution included building an unattended installation image, connecting servers to IPMI, and scripting the full upgrade workflow.",
+      "",
+      "★ Duration: ~4 months",
+      "★ Collaborators (teams): Tech, Data, Algo, DevOps, Traders",
+      "★ Responsibilities:",
+      "  (1) Coordinated with stakeholders to ensure upgrades didn't disrupt ongoing operations.",
+      "  (2) Communicated with teams/management to gather requirements, address concerns, and schedule implementation.",
+      "  (3) Bridged technical and non-technical teams to streamline the process and reduce disruption risk.",
+      "  (4) Built an autoinstall Ubuntu image for unattended installations.",
+      "  (5) Implemented a script to automate backups, image insertion via Redfish API, installation monitoring, system checks, network restore, and package setup.",
+      "★ Impact:",
+      "  Reduced manual effort/time, ensured consistent installs, minimized downtime, and improved overall system efficiency.",
+      "",
+      "Note: Source code and deeper implementation details are private due to NDA.",
+    ],
+    "Private project (NDA)": [
+      "Private project (NDA)",
+      "",
+      "I’ve worked on additional large projects that are under non-disclosure agreements.",
+      "I can discuss high-level responsibilities and outcomes in private, but cannot disclose code or sensitive details here.",
+    ],
+  };
+
+  function showPrivateProject(title: string) {
+    const lines = privateProjectDescriptions[title];
+    if (!lines) return;
+    pushOutput(["", ...lines]);
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
   function runCommand(raw: string) {
     const command = raw.trim();
     if (!command) return;
@@ -322,6 +376,41 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
                     <span key={e.id} className={styles.line}>
                       <span>Status:&nbsp;</span>
                       <span className={styles.statusValue}>{value}</span>
+                    </span>
+                  );
+                }
+
+                const privateProjectMatch = e.text.match(/^\s*-\s*(.+?)\s+—\s+Show project description\s*$/i);
+                if (!e.muted && privateProjectMatch) {
+                  const title = (privateProjectMatch[1] ?? "").trim();
+                  return (
+                    <span key={e.id} className={styles.line}>
+                      {"  - "}
+                      {title}
+                      {" — "}
+                      <button
+                        type="button"
+                        className={styles.terminalActionButton}
+                        onClick={() => showPrivateProject(title)}
+                      >
+                        Show project description
+                      </button>
+                    </span>
+                  );
+                }
+
+                const ndaDetailsMatch = e.text.match(/^Private \(NDA\):\s*Details\s*$/i);
+                if (!e.muted && ndaDetailsMatch) {
+                  return (
+                    <span key={e.id} className={styles.line}>
+                      {"Private (NDA): "}
+                      <button
+                        type="button"
+                        className={styles.terminalActionButton}
+                        onClick={() => showPrivateProject("Private project (NDA)")}
+                      >
+                        Details
+                      </button>
                     </span>
                   );
                 }

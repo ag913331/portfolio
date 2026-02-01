@@ -131,6 +131,7 @@
 
 .terminalLinkSymbol {
   margin-right: 4px;
+  color: rgba(56, 189, 248, 0.95);
 }
 
 .glow {
@@ -167,6 +168,26 @@
 .terminalLink:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.terminalActionButton {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: rgba(56, 189, 248, 0.95);
+  font: inherit;
+  cursor: pointer;
+}
+
+.terminalActionButton:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.terminalActionButton:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.9);
+  outline-offset: 2px;
 }
 
 .sectionHeader {
