@@ -5,18 +5,20 @@ export type TerminalCommandResult = {
 export type TerminalCommands = Record<string, TerminalCommandResult>;
 
 export const AVAILABLE_COMMANDS = [
+  // Keep whoami first (quickest intro), but still include ALL commands for Tab autocomplete + help.
+  "whoami",
   "certifications",
   "contacts",
   "education",
-  "exit",
   "experience",
-  "help",
   "languages",
   "life",
   "projects",
   "skills",
+  "help",
+  "clear",
+  "exit",
   "system --init",
-  "whoami",
 ] as const;
 
 export const TERMINAL_COMMANDS: TerminalCommands = {
@@ -31,6 +33,7 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "Kernel: v5.15.0-generic",
       "",
       "Available commands:",
+      "  → whoami",
       "  → certifications",
       "  → contacts",
       "  → education",
@@ -39,7 +42,6 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "  → life",
       "  → projects",
       "  → skills",
-      "  → whoami",
       "",
       "Tip:",
       "  - Type 'help' to list commands.",
