@@ -9,6 +9,7 @@ export const AVAILABLE_COMMANDS = [
   "whoami",
   "certifications",
   "contacts",
+  "download",
   "education",
   "experience",
   "languages",
@@ -36,6 +37,7 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "  → whoami",
       "  → certifications",
       "  → contacts",
+      "  → download   # download my CV",
       "  → education",
       "  → experience",
       "  → languages",
@@ -302,7 +304,7 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
   help: {
     lines: [
       "Commands:",
-      ...AVAILABLE_COMMANDS.map((c) => `  - ${c}`),
+      ...AVAILABLE_COMMANDS.map((c) => (c === "download" ? `  - ${c}  # download my CV` : `  - ${c}`)),
       "",
       "Notes:",
       "  - Commands are case-sensitive.",

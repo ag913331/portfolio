@@ -367,6 +367,18 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
       return;
     }
 
+    if (command === "download") {
+      pushOutput(["Downloading cv.pdf ..."], true);
+      const a = document.createElement("a");
+      a.href = "/cv.pdf";
+      a.download = "cv.pdf";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return;
+    }
+
     if (command === "life") {
       pushOutput([LIFE_PROMPT_LINE, ""], true);
       setLifeFlow({ mode: "awaiting_consent", termsViewed: false });
