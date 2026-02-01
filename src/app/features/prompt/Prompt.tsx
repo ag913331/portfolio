@@ -9,7 +9,6 @@ export const Prompt = () => {
         <span className={styles.promptColon}>:</span>
         <span className={styles.promptPath}>~</span>
         <span className={styles.promptSymbol}>$</span>
-        <span>&nbsp;</span>
       </span>
     );
   }
