@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BootWindow } from "@/app/features/boot/BootWindow";
 import { Terminal } from "@/app/features/terminal/Terminal";
 import { Button } from "@/app/components/Button/Button";
 import Link from "next/link";
@@ -8,10 +9,15 @@ import { makeId } from "@/app/utils/helpers";
 import { MAX_TERMINALS } from "@/app/utils/constants";
 import styles from "./page.module.css";
 
+type TerminalWindow = {
+  id: string;
+  dx: number;
+  dy: number;
+};
+
 export default function Home() {
-  const [windows, setWindows] = useState<TerminalWindow[]>(() => [
-    { id: makeId(), dx: 0, dy: 0 },
-  ]);
+  const [hasBooted, setHasBooted] = useState(false);
+  const [windows, setWindows] = useState<TerminalWindow[]>([]);
   const [tooManyModalOpen, setTooManyModalOpen] = useState(false);
   const lastSpawnAtRef = useRef(0);
 
@@ -49,6 +55,8 @@ export default function Home() {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (!hasBooted) return;
+
       // Ctrl+T is "new tab" in browsers; keep it in-app.
       const isCtrlT = e.ctrlKey && (e.key === "t" || e.key === "T");
       if (!isCtrlT) return;
@@ -79,14 +87,23 @@ export default function Home() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [spawnTerminal, tooManyModalOpen, windows.length]);
+  }, [hasBooted, spawnTerminal, tooManyModalOpen, windows.length]);
 
   const hasAnyTerminal = windows.length > 0;
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        {hasAnyTerminal ? (
+        {!hasBooted ? (
+          <section className={styles.terminalStage} aria-label="Preparing environment">
+            <BootWindow
+              onDone={() => {
+                setHasBooted(true);
+                window.setTimeout(() => spawnTerminal(), 0);
+              }}
+            />
+          </section>
+        ) : hasAnyTerminal ? (
           <section className={styles.terminalStage} aria-label="Terminal windows">
             {windows.map((w) => (
               <div
