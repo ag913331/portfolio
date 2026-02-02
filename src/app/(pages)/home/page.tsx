@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import styles from "./page.module.css";
 import { Terminal } from "@/app/features/terminal/Terminal";
+import { Button } from "@/app/components/Button/Button";
+import Link from "next/link";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(true);
@@ -28,8 +30,8 @@ export default function Home() {
               </p>
 
               <div className={styles.actions}>
-                <button
-                  type="button"
+                <Button
+                  variant="solid"
                   className={styles.openBtn}
                   onClick={() => {
                     setTerminalKey((k) => k + 1);
@@ -37,11 +39,11 @@ export default function Home() {
                   }}
                 >
                   $: Open terminal
-                </button>
+                </Button>
 
-                <a className={styles.cvBtn} href="/cv.pdf" download>
-                  Download CV
-                </a>
+                <Link className={styles.cvBtn} href="/cv.pdf" download>
+                  $: Download CV
+                </Link>
               </div>
             </div>
           </section>

@@ -4,6 +4,7 @@ import { LIFE_PROMPT_LINE, TERMS_TEXT } from "@/app/utils/constants";
 import { useTerminalController } from "@/app/features/terminal/hooks";
 import { createTerminalRenderers } from "@/app/features/terminal/renderers";
 import { Prompt } from "@/app/features/prompt/Prompt";
+import { Button } from "@/app/components/Button/Button";
 
 import styles from "./Terminal.module.css";
 
@@ -33,8 +34,8 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
 
         <div className={styles.chrome}>
           <div className={styles.dots}>
-            <button
-              type="button"
+            <Button
+              variant="unstyled"
               className={styles.dotButton}
               aria-label="Close terminal"
               title="Close terminal"
@@ -43,10 +44,10 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
               }}
             >
               <span className={`${styles.dot} ${styles.dotRed}`} />
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="unstyled"
               className={styles.dotButton}
               aria-label="Restore size"
               title="Restore size"
@@ -54,10 +55,10 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
               onClick={() => c.setIsMaximized(false)}
             >
               <span className={`${styles.dot} ${styles.dotYellow}`} />
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="unstyled"
               className={styles.dotButton}
               aria-label="Maximize"
               title="Maximize"
@@ -65,7 +66,7 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
               onClick={() => c.setIsMaximized(true)}
             >
               <span className={`${styles.dot} ${styles.dotGreen}`} />
-            </button>
+            </Button>
           </div>
           <div className={styles.title}>alexandro@localhost:~</div>
         </div>
