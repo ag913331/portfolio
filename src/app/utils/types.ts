@@ -22,6 +22,13 @@ declare global {
         onShowNdaDetails: () => void;
         getDegreeClass: (idx: number) => string;
     };
+
+    type TerminalWindow = {
+        id: string;
+        dx: number;
+        dy: number;
+        z: number;
+    };
 }
 
 export {};

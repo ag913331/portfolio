@@ -1,3 +1,5 @@
+export const MAX_TERMINALS = 5;
+
 export const LIFE_PROMPT_LINE =
     "You are about to see some amazing pictures of me. Please accept terms and conditions first.";
 

@@ -3,6 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 
 import styles from "./Terminal.module.css";
+import { Button } from "@/app/components/Button/Button";
 
 export type TerminalViewBaseController = {
   entries: Entry[];
@@ -59,17 +60,18 @@ export function TerminalView<C extends TerminalViewBaseController>({
 
         <div className={styles.chrome}>
           <div className={styles.dots}>
-            <button
-              type="button"
+            <Button
+              variant="unstyled"
               className={styles.dotButton}
               aria-label="Close terminal"
               title="Close terminal"
               onClick={() => c.closeTerminal?.()}
             >
               <span className={`${styles.dot} ${styles.dotRed}`} />
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="unstyled"
               type="button"
               className={styles.dotButton}
               aria-label="Restore size"
@@ -78,9 +80,10 @@ export function TerminalView<C extends TerminalViewBaseController>({
               onClick={() => c.setIsMaximized(false)}
             >
               <span className={`${styles.dot} ${styles.dotYellow}`} />
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant="unstyled"
               type="button"
               className={styles.dotButton}
               aria-label="Maximize"
@@ -89,7 +92,7 @@ export function TerminalView<C extends TerminalViewBaseController>({
               onClick={() => c.setIsMaximized(true)}
             >
               <span className={`${styles.dot} ${styles.dotGreen}`} />
-            </button>
+            </Button>
           </div>
 
           <div className={styles.title}>{chromeTitle}</div>
