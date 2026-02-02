@@ -25,14 +25,14 @@
 }
 
 .terminalWindow {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
+  grid-area: 1 / 1;
+  position: relative;
+  pointer-events: none;
 }
 
 .terminalWindowInner {
   position: relative;
+  pointer-events: auto;
 }
 
 .modalBackdrop {

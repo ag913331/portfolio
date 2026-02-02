@@ -13,6 +13,7 @@ type TerminalWindow = {
   id: string;
   dx: number;
   dy: number;
+  z: number;
 };
 
 export default function Home() {
@@ -27,25 +28,22 @@ export default function Home() {
     setWindows((prev) => {
       if (prev.length >= MAX_TERMINALS) return prev;
 
+      const maxZ = prev.reduce((m, w) => Math.max(m, w.z), 0);
       const i = prev.length;
-      const step = 18;
+      const step = 50;
       const maxOffset = 72;
       const dx = Math.min(i * step, maxOffset);
       const dy = Math.min(i * step, maxOffset);
 
-      const next: TerminalWindow = { id: makeId(), dx, dy };
+      const next: TerminalWindow = { id: makeId(), dx, dy, z: maxZ + 1 };
       return [...prev, next];
     });
   }, []);
 
   const bringToFront = useCallback((id: string) => {
     setWindows((prev) => {
-      const idx = prev.findIndex((w) => w.id === id);
-      if (idx < 0) return prev;
-      if (idx === prev.length - 1) return prev;
-
-      const w = prev[idx]!;
-      return [...prev.slice(0, idx), ...prev.slice(idx + 1), w];
+      const maxZ = prev.reduce((m, w) => Math.max(m, w.z), 0);
+      return prev.map((w) => (w.id === id ? { ...w, z: maxZ + 1 } : w));
     });
   }, []);
 
@@ -109,9 +107,13 @@ export default function Home() {
               <div
                 key={w.id}
                 className={styles.terminalWindow}
-                onMouseDown={() => bringToFront(w.id)}
+                style={{ zIndex: w.z }}
               >
-                <div className={styles.terminalWindowInner} style={{ left: w.dx, top: w.dy }}>
+                <div
+                  className={styles.terminalWindowInner}
+                  style={{ marginLeft: w.dx, marginTop: w.dy }}
+                  onMouseDown={() => bringToFront(w.id)}
+                >
                   <Terminal
                     key={w.id}
                     onClose={() => {
