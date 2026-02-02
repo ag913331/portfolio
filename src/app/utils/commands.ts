@@ -42,6 +42,8 @@ export const TERMINAL_COMMANDS: TerminalCommands = {
       "  - Type 'help' to list commands.",
       "  - Type 'clear' to clear the screen.",
       "  - Type 'exit' to exit the terminal.",
+      "  - Use Ctrl+T to open a new terminal window.",
+      "  - Use Ctrl+L to clear the screen.",
     ],
   },
   whoami: {

@@ -31,7 +31,7 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
       hint={
         <>
           Try: <code>whoami</code>, <code>projects</code>, <code>skills</code>, <code>life</code> — or{" "}
-          <code>help</code>. Use <code>↑</code>/<code>↓</code> for history.
+          <code>help</code>. Use <code>↑</code>/<code>↓</code> for history. Use <code>Ctrl+L</code> to clear the screen.
         </>
       }
       renderOverlay={(cc) =>

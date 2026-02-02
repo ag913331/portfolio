@@ -26,7 +26,7 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
 
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<string[]>([]);
-  const [historyIdx, setHistoryIdx] = useState<number | null>(null);
+  const [_, setHistoryIdx] = useState<number | null>(null);
   const [isBooting, setIsBooting] = useState(true);
   const [bootTyped, setBootTyped] = useState("");
   const [isMaximized, setIsMaximized] = useState(false);
