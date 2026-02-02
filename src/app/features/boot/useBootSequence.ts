@@ -5,8 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type BootStep = { delayMs: number; line: string; muted?: boolean };
 
 function makeBootScript(): BootStep[] {
-  return [
-    { delayMs: 400, line: "Welcome! We're getting your environment ready. It will take a few seconds..." },
+  const steps: BootStep[] = [
+    { delayMs: 100, line: "Welcome! We're getting your environment ready. It will take a few seconds..." },
     { delayMs: 500, line: "" },
     { delayMs: 450, line: "$ docker build -t portfolio:latest ." },
     { delayMs: 220, line: "[+] Building 0.1s (1/9) FINISHED" },
@@ -35,6 +35,10 @@ function makeBootScript(): BootStep[] {
     { delayMs: 600, line: "" },
     { delayMs: 450, line: "Starting terminal..." },
   ];
+
+  // Slow the sequence down slightly so it's easier to read.
+  const DELAY_SCALE = 1.35;
+  return steps.map((s) => ({ ...s, delayMs: Math.round(s.delayMs * DELAY_SCALE) }));
 }
 
 export function useBootSequence({ onDone }: { onDone: () => void }) {

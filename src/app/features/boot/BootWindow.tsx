@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 
 import terminalStyles from "@/app/features/terminal/Terminal.module.css";
 import { useBootSequence } from "@/app/features/boot/useBootSequence";
+import { Button } from "@/app/components/Button/Button";
+import styles from "@/app/features/boot/BootWindow.module.css";
 
 export function BootWindow({ onDone }: { onDone: () => void }) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -21,15 +23,15 @@ export function BootWindow({ onDone }: { onDone: () => void }) {
 
         <div className={terminalStyles.chrome}>
           <div className={terminalStyles.dots} aria-hidden="true">
-            <button type="button" className={terminalStyles.dotButton} disabled tabIndex={-1}>
+            <Button variant="unstyled" className={terminalStyles.dotButton} disabled tabIndex={-1}>
               <span className={`${terminalStyles.dot} ${terminalStyles.dotRed}`}>×</span>
-            </button>
-            <button type="button" className={terminalStyles.dotButton} disabled tabIndex={-1}>
+            </Button>
+            <Button variant="unstyled" className={terminalStyles.dotButton} disabled tabIndex={-1}>
               <span className={`${terminalStyles.dot} ${terminalStyles.dotYellow}`}>−</span>
-            </button>
-            <button type="button" className={terminalStyles.dotButton} disabled tabIndex={-1}>
+            </Button>
+            <Button variant="unstyled" className={terminalStyles.dotButton} disabled tabIndex={-1}>
               <span className={`${terminalStyles.dot} ${terminalStyles.dotGreen}`}>+</span>
-            </button>
+            </Button>
           </div>
           <div className={terminalStyles.title}>bootstrap@localhost:~</div>
         </div>
@@ -37,7 +39,10 @@ export function BootWindow({ onDone }: { onDone: () => void }) {
         <div className={terminalStyles.screen}>
           <div className={terminalStyles.output} aria-live="polite">
             {lines.map((l, idx) => (
-              <span key={idx} className={`${terminalStyles.line} ${l.muted ? terminalStyles.muted : ""}`}>
+              <span
+                key={idx}
+                className={`${terminalStyles.line} ${l.muted ? terminalStyles.muted : ""} ${idx === 0 ? styles.welcomeLine : ""}`}
+              >
                 {l.text}
               </span>
             ))}
