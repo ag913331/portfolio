@@ -27,7 +27,6 @@ declare global {
         id: string;
         dx: number;
         dy: number;
-        z: number;
     };
 }
 

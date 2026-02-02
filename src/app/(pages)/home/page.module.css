@@ -26,9 +26,13 @@
 
 .terminalWindow {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  will-change: transform;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.terminalWindowInner {
+  position: relative;
 }
 
 .modalBackdrop {

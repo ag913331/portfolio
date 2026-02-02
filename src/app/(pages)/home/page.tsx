@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Terminal } from "@/app/features/terminal/Terminal";
 import { Button } from "@/app/components/Button/Button";
 import Link from "next/link";
@@ -10,10 +10,9 @@ import styles from "./page.module.css";
 
 export default function Home() {
   const [windows, setWindows] = useState<TerminalWindow[]>(() => [
-    { id: makeId(), dx: 0, dy: 0, z: 1 },
+    { id: makeId(), dx: 0, dy: 0 },
   ]);
   const [tooManyModalOpen, setTooManyModalOpen] = useState(false);
-  const nextZRef = useRef(2);
   const lastSpawnAtRef = useRef(0);
 
   const canSpawn = windows.length < MAX_TERMINALS;
@@ -28,7 +27,7 @@ export default function Home() {
       const dx = Math.min(i * step, maxOffset);
       const dy = Math.min(i * step, maxOffset);
 
-      const next: TerminalWindow = { id: makeId(), dx, dy, z: nextZRef.current++ };
+      const next: TerminalWindow = { id: makeId(), dx, dy };
       return [...prev, next];
     });
   }, []);
@@ -37,10 +36,10 @@ export default function Home() {
     setWindows((prev) => {
       const idx = prev.findIndex((w) => w.id === id);
       if (idx < 0) return prev;
+      if (idx === prev.length - 1) return prev;
 
-      const z = nextZRef.current++;
-      const updated = prev.map((w) => (w.id === id ? { ...w, z } : w));
-      return updated;
+      const w = prev[idx]!;
+      return [...prev.slice(0, idx), ...prev.slice(idx + 1), w];
     });
   }, []);
 
@@ -83,7 +82,6 @@ export default function Home() {
   }, [spawnTerminal, tooManyModalOpen, windows.length]);
 
   const hasAnyTerminal = windows.length > 0;
-  const highestZ = useMemo(() => windows.reduce((m, w) => Math.max(m, w.z), 0), [windows]);
 
   return (
     <div className={styles.page}>
@@ -94,18 +92,16 @@ export default function Home() {
               <div
                 key={w.id}
                 className={styles.terminalWindow}
-                style={{
-                  zIndex: w.z,
-                  transform: `translate(-50%, -50%) translate(${w.dx}px, ${w.dy}px)`,
-                }}
                 onMouseDown={() => bringToFront(w.id)}
               >
-                <Terminal
-                  key={w.id}
-                  onClose={() => {
-                    closeWindow(w.id);
-                  }}
-                />
+                <div className={styles.terminalWindowInner} style={{ left: w.dx, top: w.dy }}>
+                  <Terminal
+                    key={w.id}
+                    onClose={() => {
+                      closeWindow(w.id);
+                    }}
+                  />
+                </div>
               </div>
             ))}
 
@@ -141,8 +137,6 @@ export default function Home() {
                 </div>
               </div>
             ) : null}
-            {/* keep stage height stable even when windows are maximized */}
-            <div aria-hidden="true" style={{ height: 1, zIndex: highestZ + 1 }} />
           </section>
         ) : (
           <section className={styles.landing} aria-label="Welcome">
