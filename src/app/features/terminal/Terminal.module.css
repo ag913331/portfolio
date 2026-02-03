@@ -4,6 +4,7 @@
 
 .wrapMax {
   width: min(1400px, 96vw);
+  height: 90vh;
 }
 
 .window {
@@ -29,6 +30,7 @@
   width: min(1400px, calc(100vw - 32px));
   z-index: 50;
   border-radius: 16px;
+  width: 90vw;
 }
 
 .chrome {

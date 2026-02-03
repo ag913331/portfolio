@@ -9,12 +9,58 @@ import { makeId } from "@/app/utils/helpers";
 import { MAX_TERMINALS } from "@/app/utils/constants";
 import styles from "./page.module.css";
 
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  useDraggable,
+} from "@dnd-kit/core";
+
 type TerminalWindow = {
   id: string;
   dx: number;
   dy: number;
   z: number;
 };
+
+function DraggableTerminalWindow({
+  w,
+  bringToFront,
+  closeWindow,
+}: {
+  w: TerminalWindow;
+  bringToFront: (id: string) => void;
+  closeWindow: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({ id: w.id });
+
+  const x = w.dx + (transform?.x ?? 0);
+  const y = w.dy + (transform?.y ?? 0);
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={styles.terminalWindow}
+      style={{
+        zIndex: w.z,
+        transform: `translate3d(${x}px, ${y}px, 0)`,
+        // optional: nicer drag feel
+        transition: isDragging ? "none" : "transform 120ms ease-out",
+      }}
+      {...attributes}
+      {...listeners}
+      onClick={() => bringToFront(w.id)}
+    >
+      <div className={styles.terminalWindowInner}>
+        <Terminal onClose={() => closeWindow(w.id)} />
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [hasBooted, setHasBooted] = useState(false);
@@ -23,6 +69,12 @@ export default function Home() {
   const lastSpawnAtRef = useRef(0);
 
   const canSpawn = windows.length < MAX_TERMINALS;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 4 }, // prevents accidental drags on click
+    })
+  );
 
   const spawnTerminal = useCallback(() => {
     setWindows((prev) => {
@@ -51,18 +103,34 @@ export default function Home() {
     setWindows((prev) => prev.filter((w) => w.id !== id));
   }, []);
 
+  const onDragStart = useCallback(
+    (e: DragStartEvent) => {
+      bringToFront(String(e.active.id));
+    },
+    [bringToFront]
+  );
+
+  const onDragEnd = useCallback((e: DragEndEvent) => {
+    const id = String(e.active.id);
+    const { x, y } = e.delta;
+
+    setWindows((prev) =>
+      prev.map((w) =>
+        w.id === id ? { ...w, dx: w.dx + x, dy: w.dy + y } : w
+      )
+    );
+  }, []);
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!hasBooted) return;
 
-      // Ctrl+T is "new tab" in browsers; keep it in-app.
       const isCtrlT = e.ctrlKey && (e.key === "t" || e.key === "T");
       if (!isCtrlT) return;
 
       e.preventDefault();
       if (tooManyModalOpen) return;
 
-      // Throttle so holding Ctrl+T doesn't spawn an absurd amount instantly.
       const now = Date.now();
       if (now - lastSpawnAtRef.current < 250) return;
       lastSpawnAtRef.current = now;
@@ -93,7 +161,10 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         {!hasBooted ? (
-          <section className={styles.terminalStage} aria-label="Preparing environment">
+          <section
+            className={styles.terminalStage}
+            aria-label="Preparing environment"
+          >
             <BootWindow
               onDone={() => {
                 setHasBooted(true);
@@ -103,48 +174,42 @@ export default function Home() {
           </section>
         ) : hasAnyTerminal ? (
           <section className={styles.terminalStage} aria-label="Terminal windows">
-            {windows.map((w) => (
-              <div
-                key={w.id}
-                className={styles.terminalWindow}
-                style={{ zIndex: w.z }}
-              >
-                <div
-                  className={styles.terminalWindowInner}
-                  style={{ marginLeft: w.dx, marginTop: w.dy }}
-                  onMouseDown={() => bringToFront(w.id)}
-                >
-                  <Terminal
-                    key={w.id}
-                    onClose={() => {
-                      closeWindow(w.id);
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
+            <DndContext
+              sensors={sensors}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+            >
+              {windows.map((w) => (
+                <DraggableTerminalWindow
+                  key={w.id}
+                  w={w}
+                  bringToFront={bringToFront}
+                  closeWindow={closeWindow}
+                />
+              ))}
+            </DndContext>
 
             {tooManyModalOpen ? (
-              <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Too many terminals">
+              <div
+                className={styles.modalBackdrop}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Too many terminals"
+              >
                 <div className={styles.modal}>
                   <div className={styles.modalTitle}>Wooha, hold on buddy…</div>
                   <p className={styles.modalText}>
-                    What are you going to do with so many terminals? (Max {MAX_TERMINALS}.)
+                    What are you going to do with so many terminals? (Max{" "}
+                    {MAX_TERMINALS}.)
                   </p>
                   <div className={styles.modalActions}>
-                    <Button
-                      variant="solid"
-                      onClick={() => {
-                        setTooManyModalOpen(false);
-                      }}
-                    >
+                    <Button variant="solid" onClick={() => setTooManyModalOpen(false)}>
                       OK
                     </Button>
                     <Button
                       variant="ghost"
                       disabled={canSpawn}
                       onClick={() => {
-                        // Optional nicety: close the oldest and open a new one.
                         setTooManyModalOpen(false);
                         setWindows((prev) => (prev.length ? prev.slice(1) : prev));
                         window.setTimeout(() => spawnTerminal(), 0);
@@ -167,13 +232,7 @@ export default function Home() {
               </p>
 
               <div className={styles.actions}>
-                <Button
-                  variant="solid"
-                  className={styles.openBtn}
-                  onClick={() => {
-                    spawnTerminal();
-                  }}
-                >
+                <Button variant="solid" className={styles.openBtn} onClick={spawnTerminal}>
                   $: Open terminal
                 </Button>
 
