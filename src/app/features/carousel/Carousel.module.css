@@ -1,0 +1,54 @@
+.carousel {
+    margin: 2rem 0 3rem;
+    display: grid;
+    gap: 1.25rem;
+  }
+  
+  .text {
+    text-align: center;
+  }
+  
+  .slideTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .slideDescription {
+    opacity: 0.8;
+    max-width: 520px;
+    margin: 0.25rem auto 0;
+  }
+  
+  .imageWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+  
+  .image {
+    object-fit: contain;
+  }
+  
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .controls button {
+    background: transparent;
+    border: 1px solid currentColor;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .counter {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+  

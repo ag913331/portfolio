@@ -1,5 +1,7 @@
 import Link from "next/link";
 import styles from "./page.module.css";
+import { Carousel } from "@/app/features/carousel/Carousel";
+import { SLIDES } from "@/app/utils/constants";
 
 export default function LifePage() {
   return (
@@ -8,9 +10,8 @@ export default function LifePage() {
         <div className={styles.inner}>
           <p className={styles.kicker}>Life</p>
           <h1 className={styles.title}>Personal info</h1>
-          <p className={styles.subtitle}>
-            (Placeholder) This page will contain personal content. I’m keeping it empty for now.
-          </p>
+          
+          <Carousel slides={SLIDES} />
 
           <p className={styles.notice}>
             Reminder: pictures/content shown here should not be downloaded or redistributed without permission.

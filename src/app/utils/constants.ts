@@ -63,3 +63,36 @@ export const PRIVATE_PROJECT_DESCRIPTIONS: Record<string, string[]> = {
       "I can discuss high-level responsibilities and outcomes in private, but cannot disclose code or sensitive details here.",
     ],
 };
+
+export const SLIDES = [
+  {
+    title: "Me learning Mathematics",
+    description:
+      "Here you can see me extremely exhausted after a long day of learning Mathematics.",
+    image: "/life/pic4.jpg",
+  },
+  {
+    title: "Me learning Software Engineering",
+    description:
+      "Here you can see me celebrating another successful exam.",
+    image: "/life/pic2.jpg",
+  },
+  {
+    title: "Me travelling to a foreign country to learn DevOps principles",
+    description:
+      "Here you can see me happy to learn new things and experience new cultures.",
+    image: "/life/pic5.jpg",
+  },
+  {
+    title: "Me returning back home from Errasmus",
+    description:
+      "Here you can see me travelling back home after a long journey learning new things about OOP and other programming stuff.",
+    image: "/life/pic1.jpg",
+  },
+  {
+    title: "Me doing some mathematical calculations",
+    description:
+      "Here you can see me doing some mathematical calculations to solve a problem.",
+    image: "/life/pic3.jpg",
+  }
+];
