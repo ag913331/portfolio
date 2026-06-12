@@ -1,10 +1,10 @@
 "use client";
 
-import { LIFE_PROMPT_LINE, TERMS_TEXT } from "@/app/utils/constants";
-import { useTerminalController } from "@/app/features/terminal/hooks";
-import { createTerminalRenderers } from "@/app/features/terminal/renderers";
-import { Prompt } from "@/app/features/prompt/Prompt";
-import { TerminalView } from "@/app/features/terminal/TerminalView";
+import { LIFE_PROMPT_LINE, TERMS_TEXT } from "@/content/constants";
+import { useTerminalController } from "@/features/terminal/useTerminalController";
+import { createTerminalRenderers } from "@/features/terminal/renderers";
+import { Prompt } from "@/features/prompt/Prompt";
+import { TerminalView } from "@/features/terminal/TerminalView";
 
 import styles from "./Terminal.module.css";
 

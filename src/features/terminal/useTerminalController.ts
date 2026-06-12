@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "@/app/utils/commands";
-import { formatLastLogin, makeId } from "@/app/utils/helpers";
-import { LIFE_PROMPT_LINE, PRIVATE_PROJECT_DESCRIPTIONS } from "@/app/utils/constants";
+import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "@/content/commands";
+import { formatLastLogin, makeId } from "@/lib/helpers";
+import { LIFE_PROMPT_LINE, PRIVATE_PROJECT_DESCRIPTIONS } from "@/content/constants";
 
 type LifeFlowState =
   | { mode: "idle" }

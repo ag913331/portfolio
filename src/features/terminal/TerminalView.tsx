@@ -3,7 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 
 import styles from "./Terminal.module.css";
-import { Button } from "@/app/components/Button/Button";
+import { Button } from "@/components/Button/Button";
 
 export type TerminalViewBaseController = {
   entries: Entry[];

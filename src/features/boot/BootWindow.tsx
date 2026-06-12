@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
-import terminalStyles from "@/app/features/terminal/Terminal.module.css";
-import { useBootSequence } from "@/app/features/boot/useBootSequence";
-import { Button } from "@/app/components/Button/Button";
-import styles from "@/app/features/boot/BootWindow.module.css";
+import terminalStyles from "@/features/terminal/Terminal.module.css";
+import { useBootSequence } from "@/features/boot/useBootSequence";
+import { Button } from "@/components/Button/Button";
+import styles from "@/features/boot/BootWindow.module.css";
 
 export function BootWindow({ onDone }: { onDone: () => void }) {
   const bottomRef = useRef<HTMLDivElement | null>(null);

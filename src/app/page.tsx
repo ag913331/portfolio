@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BootWindow } from "@/app/features/boot/BootWindow";
-import { Terminal } from "@/app/features/terminal/Terminal";
-import { Button } from "@/app/components/Button/Button";
+import { BootWindow } from "@/features/boot/BootWindow";
+import { Terminal } from "@/features/terminal/Terminal";
+import { Button } from "@/components/Button/Button";
 import Link from "next/link";
-import { makeId } from "@/app/utils/helpers";
-import { MAX_TERMINALS } from "@/app/utils/constants";
+import { makeId } from "@/lib/helpers";
+import { MAX_TERMINALS } from "@/content/constants";
 import styles from "./page.module.css";
 
 import {

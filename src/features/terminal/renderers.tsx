@@ -1,6 +1,6 @@
 "use client";
 
-import { toHref } from "@/app/utils/helpers";
+import { toHref } from "@/lib/helpers";
 
 export function createTerminalRenderers(
   styles: CSSModuleClasses,

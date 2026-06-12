@@ -1,7 +1,7 @@
 import Link from "next/link";
 import styles from "./page.module.css";
-import { Carousel } from "@/app/features/carousel/Carousel";
-import { SLIDES } from "@/app/utils/constants";
+import { Carousel } from "@/features/carousel/Carousel";
+import { SLIDES } from "@/content/constants";
 
 export default function LifePage() {
   return (
