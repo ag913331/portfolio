@@ -1,5 +1,3 @@
 .welcomeLine {
-  color: rgba(34, 197, 94, 0.95);
+  color: rgba(var(--green), 0.95);
 }
-
-

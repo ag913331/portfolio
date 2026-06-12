@@ -7,10 +7,7 @@ import { action, blank, prose, text } from "@/content/format";
 import { formatLastLogin, makeId } from "@/lib/helpers";
 import { LIFE_PROMPT_LINE, PRIVATE_PROJECT_DESCRIPTIONS } from "@/content/constants";
 
-type LifeFlowState =
-  | { mode: "idle" }
-  | { mode: "awaiting_consent"; termsViewed: boolean }
-  | { mode: "show_terms" };
+type LifeFlowState = { mode: "idle" } | { mode: "awaiting_consent"; termsViewed: boolean } | { mode: "show_terms" };
 
 export function useTerminalController({ onClose }: { onClose?: () => void }) {
   const router = useRouter();
@@ -144,7 +141,11 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
         const idx = LIFE_PROMPT_LINE.indexOf(needle);
         pushNodes([
           {
-            parts: [LIFE_PROMPT_LINE.slice(0, idx), action("terms", needle), LIFE_PROMPT_LINE.slice(idx + needle.length)],
+            parts: [
+              LIFE_PROMPT_LINE.slice(0, idx),
+              action("terms", needle),
+              LIFE_PROMPT_LINE.slice(idx + needle.length),
+            ],
             muted: true,
           },
           blank(true),

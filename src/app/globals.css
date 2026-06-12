@@ -1,6 +1,28 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Color palette — stored as "R, G, B" triples so callers control alpha via rgba(var(--x), a). */
+  --accent: 56, 189, 248;
+  --green: 34, 197, 94;
+  --yellow: 254, 188, 46;
+  --red: 239, 68, 68;
+  --purple: 168, 85, 247;
+  --text: 226, 232, 240;
+  --muted: 148, 163, 184;
+  --surface-1: 14, 20, 28;
+  --surface-2: 7, 9, 12;
+
+  --mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+
+  /* Shared full-page backdrop used by the home and life routes. */
+  --page-bg:
+    radial-gradient(900px 600px at 50% 10%, rgba(var(--accent), 0.12), rgba(0, 0, 0, 0) 60%),
+    radial-gradient(700px 520px at 20% 80%, rgba(var(--green), 0.1), rgba(0, 0, 0, 0) 55%),
+    radial-gradient(900px 700px at 85% 75%, rgba(var(--purple), 0.09), rgba(0, 0, 0, 0) 55%),
+    linear-gradient(180deg, #07090c 0%, #03040a 100%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +41,17 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    "Apple Color Emoji", "Segoe UI Emoji";
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

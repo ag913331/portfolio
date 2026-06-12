@@ -13,10 +13,8 @@ type Slide = {
 export function Carousel({ slides }: { slides: Slide[] }) {
   const [index, setIndex] = useState(0);
 
-  const prev = () =>
-    setIndex((i) => (i === 0 ? slides.length - 1 : i - 1));
-  const next = () =>
-    setIndex((i) => (i === slides.length - 1 ? 0 : i + 1));
+  const prev = () => setIndex((i) => (i === 0 ? slides.length - 1 : i - 1));
+  const next = () => setIndex((i) => (i === slides.length - 1 ? 0 : i + 1));
 
   const slide = slides[index];
 
@@ -36,7 +34,7 @@ export function Carousel({ slides }: { slides: Slide[] }) {
           fill
           sizes="(max-width: 768px) 100vw, 600px"
           className={styles.image}
-          priority
+          priority={index === 0}
         />
       </div>
 

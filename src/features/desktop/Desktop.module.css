@@ -23,7 +23,7 @@
   width: min(640px, 92vw);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(180deg, rgba(14, 20, 28, 0.98), rgba(7, 9, 12, 0.98));
+  background: linear-gradient(180deg, rgba(var(--surface-1), 0.98), rgba(var(--surface-2), 0.98));
   box-shadow:
     0 30px 120px rgba(0, 0, 0, 0.75),
     0 0 0 1px rgba(255, 255, 255, 0.04) inset;
@@ -31,15 +31,14 @@
 }
 
 .modalTitle {
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+  font-family: var(--mono);
   font-size: 14px;
-  color: rgba(226, 232, 240, 0.95);
+  color: rgba(var(--text), 0.95);
   margin-bottom: 8px;
 }
 
 .modalText {
-  color: rgba(148, 163, 184, 0.9);
+  color: rgba(var(--muted), 0.9);
   line-height: 1.6;
   margin-bottom: 14px;
 }

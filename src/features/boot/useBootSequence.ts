@@ -74,8 +74,5 @@ export function useBootSequence({ onDone }: { onDone: () => void }) {
     };
   }, [onDone, script]);
 
-  const isDone = lines.length >= script.length;
-  return { lines, isDone };
+  return { lines };
 }
-
-

@@ -4,7 +4,9 @@ import { useEffect, useRef } from "react";
 
 import terminalStyles from "@/features/terminal/Terminal.module.css";
 import { useBootSequence } from "@/features/boot/useBootSequence";
+import { TerminalChrome } from "@/features/terminal/TerminalChrome";
 import { Button } from "@/components/Button/Button";
+import { HOST } from "@/content/constants";
 import styles from "@/features/boot/BootWindow.module.css";
 
 export function BootWindow({ onDone }: { onDone: () => void }) {
@@ -17,12 +19,12 @@ export function BootWindow({ onDone }: { onDone: () => void }) {
 
   return (
     <div className={terminalStyles.wrap}>
-      <div className={terminalStyles.window} role="application" aria-label="Preparing environment">
-        <div className={terminalStyles.glow} />
-        <div className={terminalStyles.scanlines} />
-
-        <div className={terminalStyles.chrome}>
-          <div className={terminalStyles.dots} aria-hidden="true">
+      <TerminalChrome
+        ariaLabel="Preparing environment"
+        title={`bootstrap@${HOST}:~`}
+        dotsAriaHidden
+        dots={
+          <>
             <Button variant="unstyled" className={terminalStyles.dotButton} disabled tabIndex={-1}>
               <span className={`${terminalStyles.dot} ${terminalStyles.dotRed}`}>×</span>
             </Button>
@@ -32,10 +34,9 @@ export function BootWindow({ onDone }: { onDone: () => void }) {
             <Button variant="unstyled" className={terminalStyles.dotButton} disabled tabIndex={-1}>
               <span className={`${terminalStyles.dot} ${terminalStyles.dotGreen}`}>+</span>
             </Button>
-          </div>
-          <div className={terminalStyles.title}>bootstrap@localhost:~</div>
-        </div>
-
+          </>
+        }
+      >
         <div className={terminalStyles.screen}>
           <div className={terminalStyles.output} aria-live="polite">
             {lines.map((l, idx) => (
@@ -52,9 +53,7 @@ export function BootWindow({ onDone }: { onDone: () => void }) {
             <div ref={bottomRef} />
           </div>
         </div>
-      </div>
+      </TerminalChrome>
     </div>
   );
 }
-
-

@@ -4,6 +4,7 @@ import type { ComponentType, ReactNode } from "react";
 
 import styles from "./Terminal.module.css";
 import { Button } from "@/components/Button/Button";
+import { TerminalChrome } from "@/features/terminal/TerminalChrome";
 
 export type TerminalViewBaseController = {
   entries: Entry[];
@@ -68,16 +69,12 @@ export function TerminalView<C extends TerminalViewBaseController>({
 
   return (
     <div className={`${styles.wrap} ${isMaximized ? styles.wrapMax : ""}`} onMouseDown={focusInput}>
-      <div
-        className={`${styles.window} ${isMaximized ? styles.windowMax : ""}`}
-        role="application"
-        aria-label="Portfolio terminal"
-      >
-        <div className={styles.glow} />
-        <div className={styles.scanlines} />
-
-        <div className={styles.chrome}>
-          <div className={styles.dots}>
+      <TerminalChrome
+        ariaLabel="Portfolio terminal"
+        title={chromeTitle}
+        maximized={isMaximized}
+        dots={
+          <>
             <Button
               variant="unstyled"
               className={styles.dotButton}
@@ -111,11 +108,9 @@ export function TerminalView<C extends TerminalViewBaseController>({
             >
               <span className={`${styles.dot} ${styles.dotGreen}`} />
             </Button>
-          </div>
-
-          <div className={styles.title}>{chromeTitle}</div>
-        </div>
-
+          </>
+        }
+      >
         <div className={`${styles.screen} ${isMaximized ? styles.screenMax : ""}`}>
           <div className={styles.output} aria-live="polite">
             {entries.map((e) => {
@@ -180,9 +175,7 @@ export function TerminalView<C extends TerminalViewBaseController>({
         </div>
 
         {renderOverlay ? renderOverlay(controller) : null}
-      </div>
+      </TerminalChrome>
     </div>
   );
 }
-
-

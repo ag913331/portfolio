@@ -1,6 +1,6 @@
 "use client";
 
-import { TERMS_TEXT } from "@/content/constants";
+import { HOST, TERMS_TEXT, USER } from "@/content/constants";
 import { useTerminalController } from "@/features/terminal/useTerminalController";
 import { createTerminalRenderers } from "@/features/terminal/renderers";
 import { Prompt } from "@/features/prompt/Prompt";
@@ -22,11 +22,11 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
       controller={c}
       PromptComponent={Prompt}
       renderOutputEntry={renderOutputEntry}
-      chromeTitle="alexandro@localhost:~"
+      chromeTitle={`${USER}@${HOST}:~`}
       hint={
         <>
-          Try: <code>whoami</code>, <code>projects</code>, <code>skills</code>, <code>life</code> — or{" "}
-          <code>help</code>. Use <code>↑</code>/<code>↓</code> for history. Use <code>Ctrl+L</code> to clear the screen.
+          Try: <code>whoami</code>, <code>projects</code>, <code>skills</code>, <code>life</code> — or <code>help</code>
+          . Use <code>↑</code>/<code>↓</code> for history. Use <code>Ctrl+L</code> to clear the screen.
         </>
       }
       renderOverlay={(cc) =>

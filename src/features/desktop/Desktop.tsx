@@ -31,9 +31,7 @@ export function Desktop({ manager }: { manager: WindowManager }) {
         <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Too many terminals">
           <div className={styles.modal}>
             <div className={styles.modalTitle}>Wooha, hold on buddy…</div>
-            <p className={styles.modalText}>
-              What are you going to do with so many terminals? (Max {MAX_TERMINALS}.)
-            </p>
+            <p className={styles.modalText}>What are you going to do with so many terminals? (Max {MAX_TERMINALS}.)</p>
             <div className={styles.modalActions}>
               <Button variant="solid" onClick={() => manager.setTooManyModalOpen(false)}>
                 OK
