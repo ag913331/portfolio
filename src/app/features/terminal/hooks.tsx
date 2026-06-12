@@ -26,7 +26,7 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
 
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<string[]>([]);
-  const [_, setHistoryIdx] = useState<number | null>(null);
+  const [historyIdx, setHistoryIdx] = useState<number | null>(null);
   const [isBooting, setIsBooting] = useState(true);
   const [bootTyped, setBootTyped] = useState("");
   const [isMaximized, setIsMaximized] = useState(false);
@@ -185,8 +185,6 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
         return;
       }
 
-      if (e.key === "Enter") return;
-
       if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
         e.preventDefault();
         setValue("");
@@ -196,29 +194,27 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
 
       if (e.key === "ArrowUp") {
         e.preventDefault();
-        setHistoryIdx((prev) => {
-          const next = prev === null ? history.length - 1 : Math.max(0, prev - 1);
-          setValue(history[next] ?? "");
-          return next;
-        });
+        if (history.length === 0) return;
+        const next = historyIdx === null ? history.length - 1 : Math.max(0, historyIdx - 1);
+        setHistoryIdx(next);
+        setValue(history[next] ?? "");
         return;
       }
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setHistoryIdx((prev) => {
-          if (prev === null) return null;
-          const next = prev + 1;
-          if (next >= history.length) {
-            setValue("");
-            return null;
-          }
-          setValue(history[next] ?? "");
-          return next;
-        });
+        if (historyIdx === null) return;
+        const next = historyIdx + 1;
+        if (next >= history.length) {
+          setHistoryIdx(null);
+          setValue("");
+          return;
+        }
+        setHistoryIdx(next);
+        setValue(history[next] ?? "");
       }
     },
-    [history, isBooting, isOverlayOpen, runCommand, suggestion],
+    [history, historyIdx, isBooting, isOverlayOpen, runCommand, suggestion],
   );
 
   useEffect(() => {
@@ -235,9 +231,6 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
 
     let i = 0;
     let cancelled = false;
-
-    setIsBooting(true);
-    setBootTyped("");
 
     const t = window.setInterval(() => {
       if (cancelled) return;

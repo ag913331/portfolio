@@ -9,11 +9,6 @@ declare global {
         | { kind: "output"; id: string; text: string; muted?: boolean }
         | { kind: "input"; id: string; command: string };
 
-    type LifeFlowState =
-        | { mode: "idle" }
-        | { mode: "awaiting_consent"; termsViewed: boolean }
-        | { mode: "show_terms" };
-
     type CSSModuleClasses = Record<string, string>;
 
     type RendererCallbacks = {
@@ -21,12 +16,6 @@ declare global {
         onShowPrivateProject: (title: string) => void;
         onShowNdaDetails: () => void;
         getDegreeClass: (idx: number) => string;
-    };
-
-    type TerminalWindow = {
-        id: string;
-        dx: number;
-        dy: number;
     };
 }
 
