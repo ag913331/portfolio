@@ -1,3 +1,18 @@
+import { toHref } from "@/lib/helpers";
+import { action, blank, em, link, node, position, section, text } from "@/content/format";
+import {
+  CERTIFICATIONS,
+  CONTACTS,
+  EDUCATION,
+  EXPERIENCE,
+  LANGUAGES,
+  PRIVATE_PROJECTS,
+  PROFILE,
+  PUBLIC_PROJECTS,
+  SKILLS,
+  WHOAMI,
+} from "@/content/resume";
+
 export const AVAILABLE_COMMANDS = [
   "whoami",
   "certifications",
@@ -15,300 +30,161 @@ export const AVAILABLE_COMMANDS = [
   "system --init",
 ] as const;
 
+// Commands surfaced in the `system --init` banner (everything the visitor can explore).
+const MENU_COMMANDS = AVAILABLE_COMMANDS.filter((c) => !["help", "clear", "exit", "system --init"].includes(c));
+
+function systemInit(): LineNode[] {
+  return [
+    text("System initialized..."),
+    blank(),
+    text("Welcome to the Dev/Ops Environment."),
+    blank(),
+    text(`User: ${PROFILE.name}`),
+    text(`Role: ${PROFILE.role}`),
+    node(["Status: ", em(PROFILE.status, "status")]),
+    text(`Kernel: ${PROFILE.kernel}`),
+    blank(),
+    text("Available commands:"),
+    ...MENU_COMMANDS.map((c) => text(c === "download" ? "  → download   # download my CV" : `  → ${c}`)),
+    blank(),
+    text("Tip:"),
+    text("  - Type 'help' to list commands."),
+    text("  - Type 'clear' to clear the screen."),
+    text("  - Type 'exit' to exit the terminal."),
+    text("  - Use Ctrl+T to open a new terminal window."),
+    text("  - Use Ctrl+L to clear the screen."),
+  ];
+}
+
+function whoami(): LineNode[] {
+  return [
+    text(WHOAMI.intro[0]),
+    blank(),
+    text(WHOAMI.intro[1]),
+    blank(),
+    ...WHOAMI.groups.flatMap((g) => [section(`★ ${g.title}`), ...g.bullets.map((b) => text(`  • ${b}`)), blank()]),
+    section(`★ ${WHOAMI.outro}`),
+    blank(),
+  ];
+}
+
+function contacts(): LineNode[] {
+  return CONTACTS.map((c) => {
+    const href = toHref(c.value) ?? c.value;
+    return node([`  - ${c.label}: `, link(href, c.value, !href.startsWith("mailto:"))]);
+  });
+}
+
+function certifications(): LineNode[] {
+  const out: LineNode[] = [text("Certifications:"), blank()];
+
+  CERTIFICATIONS.forEach((c, i) => {
+    out.push(position(`o--------> ${c.title}`));
+    out.push(text(`|          issued_by: ${c.issuedBy}`));
+    out.push(text(`|          date: ${c.date}`));
+
+    const href = toHref(c.credential);
+    if (href && !href.startsWith("mailto:")) {
+      out.push(node(["|          credential: 🔗 ", link(href, "Show credential")]));
+    } else {
+      out.push(text(`|          credential: ${c.credential}`));
+    }
+
+    if (i < CERTIFICATIONS.length - 1) out.push(text("|"));
+  });
+
+  return out;
+}
+
+function education(): LineNode[] {
+  const out: LineNode[] = [text("{"), text(`     "education": [`)];
+
+  EDUCATION.forEach((e, i) => {
+    const degreeTone = `degree${i + 1}` as EmTone;
+    const last = i === EDUCATION.length - 1;
+
+    out.push(text("         {"));
+    out.push(node([`             "institution": "`, em(e.institution, "institution"), `",`]));
+    out.push(node([`             "degree": "`, em(e.degree, degreeTone), `",`]));
+    out.push(text(`             "field_of_study": "${e.fieldOfStudy}",`));
+    out.push(text(`             "period": "${e.period}"`));
+    out.push(text(last ? "         }" : "         },"));
+  });
+
+  out.push(text("     ]"));
+  out.push(text("}"));
+  return out;
+}
+
+function experience(): LineNode[] {
+  const out: LineNode[] = [text("Experience:"), blank(), text("|")];
+
+  EXPERIENCE.forEach((j, i) => {
+    out.push(position(`o--------> ${j.role}`));
+    out.push(text(`|          type: ${j.type}`));
+    out.push(node([`|          period: `, em(j.period, j.current ? "periodCurrent" : "period")]));
+    out.push(text(`|          company: ${j.company}`));
+    out.push(text(`|          location: ${j.location}`));
+    out.push(text(`|          description:`));
+    j.description.forEach((b) => out.push(text(`|            * ${b}`)));
+
+    if (i < EXPERIENCE.length - 1) {
+      out.push(text("|"));
+      out.push(text("|"));
+    }
+  });
+
+  return out;
+}
+
+function languages(): LineNode[] {
+  return [text("Languages:"), ...LANGUAGES.map((l) => text(`  - ${l.name} — ${l.level}`))];
+}
+
+function skills(): LineNode[] {
+  return SKILLS.flatMap((g, i) => [
+    section(`★ ${g.title}`),
+    ...g.items.map((s) => text(`  - ${s}`)),
+    ...(i < SKILLS.length - 1 ? [blank()] : []),
+  ]);
+}
+
+function projects(): LineNode[] {
+  return [
+    blank(),
+    text("Public (open-source):"),
+    ...PUBLIC_PROJECTS.flatMap((p) => [
+      text(`  - ${p.name} — ${p.description}`),
+      node([`    - repo: `, link(p.repo, p.repo)]),
+      blank(),
+    ]),
+    node(["Private (NDA): ", action("nda", "Details")]),
+    ...PRIVATE_PROJECTS.map((p) => node([`  - ${p.title} — `, action("project", "Show project description", p.title)])),
+  ];
+}
+
+function help(): LineNode[] {
+  return [
+    text("Commands:"),
+    ...AVAILABLE_COMMANDS.map((c) => text(c === "download" ? `  - ${c}  # download my CV` : `  - ${c}`)),
+    blank(),
+    text("Notes:"),
+    text("  - Commands are case-sensitive."),
+    text("  - Use ↑ / ↓ to cycle history."),
+    text("  - Use Ctrl+L to clear."),
+    text("  - Use Tab to autocomplete commands."),
+  ];
+}
+
 export const TERMINAL_COMMANDS: TerminalCommands = {
-  "system --init": {
-    lines: [
-      "System initialized...",
-      "",
-      "Welcome to the Dev/Ops Environment.",
-      "",
-      "User: Alexandro Georgiev",
-      "Role: Fullstack & DevOps Engineer",
-      "Status: Online",
-      "Kernel: v5.15.0-generic",
-      "",
-      "Available commands:",
-      "  → whoami",
-      "  → certifications",
-      "  → contacts",
-      "  → download   # download my CV",
-      "  → education",
-      "  → experience",
-      "  → languages",
-      "  → life",
-      "  → projects",
-      "  → skills",
-      "",
-      "Tip:",
-      "  - Type 'help' to list commands.",
-      "  - Type 'clear' to clear the screen.",
-      "  - Type 'exit' to exit the terminal.",
-      "  - Use Ctrl+T to open a new terminal window.",
-      "  - Use Ctrl+L to clear the screen.",
-    ],
-  },
-  whoami: {
-    lines: [
-      "Hello, I'm Alexandro Georgiev. I'm a software engineer passionate about automation, system reliability, and cross-functional problem-solving.",
-      " ",
-      "With a foundation in backend scripting and a strong grasp of DevOps culture and tools, I specialize in: Python Automation | DevOps Engineer | Fullstack Developer (React & Next.js).",
-      " ",
-      "★ Python Automation & DevOps",
-      "  • Designed and deployed scalable CI/CD pipelines using Jenkins, Docker, Groovy, and Git",
-      "  • Automated OS provisioning and upgrades across hundreds of servers with Python/Bash, Redfish API, and Airflow",
-      "  • Implemented logging, backup, and monitoring solutions that improved operational stability and resolution times",
-      "  • Worked hands-on with Linux kernel tuning, IPMI tooling, and image building (Cubic)",
-      "",
-      "★ Cloud & Infrastructure",
-      "  • Built infrastructure and automation on both AWS and GCP (Cloud Run, Cloud Build, IAM, S3)",
-      "  • Worked with Google Cloud services and cloud automation patterns in production",
-      "  • Employed Ansible and Airflow for orchestrated deployments and task scheduling",
-      "",
-      "★ Fullstack Development",
-      "  • Built and maintained front-end and internal tools using React, Next.js, and TanStack Query",
-      "  • Developed backend APIs with Node.js, Prisma, and PostgreSQL",
-      "  • Created customer-facing applications and internal dashboards, optimizing UX and performance",
-      "",
-      "★ Team & Delivery Focus",
-      "  • Comfortable in Agile teams: sprint planning, documentation, cross-departmental communication",
-      "  • Known for debugging under pressure, delivering reliable infrastructure, and bridging Dev and Ops teams",
-      "",
-      "★ I’m especially passionate about reducing manual toil through automation and helping teams ship faster, safer, and with confidence.",
-      "",
-    ],
-  },
-  contacts: {
-    lines: [
-      "  - GitHub: https://github.com/ag913331",
-      "  - LinkedIn: www.linkedin.com/in/alexandro-georgiev-711b631b5",
-      "  - Email: georgievalexandro@gmail.com",
-    ],
-  },
-  certifications: {
-    lines: [
-      "Certifications:",
-      "",
-      "o--------> Oracle Database 12c: SQL Fundamentals",
-      "|          issued_by: Technical University of Varna",
-      "|          date: May 2018",
-      "|          credential: on paper",
-      "|",
-      "o--------> JavaScript Algorithms and Data Structures",
-      "|          issued_by: freeCodeCamp",
-      "|          date: Jan 2020",
-      "|          credential: https://www.freecodecamp.org/certification/r3d/javascript-algorithms-and-data-structures",
-      "|",
-      "o--------> Scientific Computing with Python",
-      "|          issued_by: freeCodeCamp",
-      "|          date: March 2022",
-      "|          credential: https://www.freecodecamp.org/certification/r3d/scientific-computing-with-python-v7",
-      "|",
-      "o--------> AWS Certified Cloud Practitioner Certificate of Completion",
-      "|          issued_by: ExamPro",
-      "|          date: Jul 2024",
-      "|          credential: https://app.exampro.co/student/achievements/validate/certificate/HMQ04CENAWqbbhrBwatQHw2642e",
-      "|",
-      "o--------> AWS Certified Cloud Practitioner",
-      "|          issued_by: Amazon Web Services (AWS)",
-      "|          date: Aug 2024",
-      "|          credential: https://www.credly.com/badges/a97ccb15-c399-48bd-8766-cdc5ce17fd8c/public_url",
-    ],
-  },
-  education: {
-    lines: [
-      "{",
-      "     \"education\": [",
-      "         {",
-      "             \"institution\": \"High School of Mathematics 'Dr Petar Beron' - Varna\",",
-      "             \"degree\": \"High School Diploma\",",
-      "             \"field_of_study\": \"Mathematics and Internet Technologies\",",
-      "             \"period\": \"2011 - 2016\"",
-      "         },",
-      "         {",
-      "             \"institution\": \"Technical University of Varna\",",
-      "             \"degree\": \"Bachelor's degree\",",
-      "             \"field_of_study\": \"Software and Internet Technologies\",",
-      "             \"period\": \"2016 - 2020\"",
-      "         },",
-      "         {",
-      "             \"institution\": \"Technical University of Varna\",",
-      "             \"degree\": \"Master's degree\",",
-      "             \"field_of_study\": \"Computer Software Engineering\",",
-      "             \"period\": \"2020 - 2022\"",
-      "         }",
-      "     ]",
-      "}",
-    ],
-  },
-  languages: {
-    lines: [
-      "Languages:",
-      "  - Bulgarian — Native or bilingual proficiency",
-      "  - English — Full professional proficiency",
-      "  - Romanian — Native or bilingual proficiency",
-      "  - Russian — Professional working proficiency",
-    ],
-  },
-  experience: {
-    lines: [
-      "Experience:",
-      "",
-      "|",
-      "o--------> Frontend Developer",
-      "|          type: Full-time",
-      "|          period: Aug 2018 - Aug 2020",
-      "|          company: BROKER INS ONLINE",
-      "|          location: Varna, Bulgaria",
-      "|          description:",
-      "|            * Created dashboards and APIs for modeling and managing insurance products",
-      "|            * Built customer-facing and internal tools using React and Node.js",
-      "|            * Collaborated with business stakeholders to define and deliver features",
-      "|            * Enhanced performance and responsiveness through testing and optimization",
-      "|",
-      "|",
-      "o--------> Fullstack Developer",
-      "|          type: Full-time",
-      "|          period: Aug 2020 - Jan 2022",
-      "|          company: InsInCloud",
-      "|          location: Varna, Bulgaria",
-      "|          description:",
-      "|            * Built reusable UI components using React and Vue",
-      "|            * Integrated RESTful APIs and managed global state with Redux",
-      "|            * Employed Jest and Mocha for test coverage and quality assurance",
-      "|            * Automated repetitive dev tasks with Python, Bash, and CI/CD pipelines",
-      "|            * Collaborated in Agile teams, improving development cycles and delivery speed",
-      "|",
-      "|",
-      "o--------> DevOps & Automation Engineer",
-      "|          type: Full-time",
-      "|          period: Feb 2022 - Apr 2024",
-      "|          company: MB Consulting",
-      "|          location: Remote",
-      "|          description:",
-      "|            * Automated OS transition of production servers from CentOS to Ubuntu",
-      "|            * Developed unattended installation images with Cubic, Redfish API, and Bash",
-      "|            * Streamlined CI/CD pipelines using Jenkins, Groovy, and Docker",
-      "|            * Automated testing and recovery processes to enhance uptime and reliability",
-      "|            * Built incident response tools and improved logging/monitoring systems",
-      "|            * Promoted DevOps culture by bridging Dev, Ops, and QA teams",
-      "|",
-      "|",
-      "o--------> Fullstack & Cloud DevOps Engineer",
-      "|          type: Full-time",
-      "|          period: Nov 2024 - Current",
-      "|          company: BuildColab",
-      "|          location: Varna, Bulgaria",
-      "|          description:",
-      "|            * Developed frontend apps using React, Next.js, and TanStack React Query",
-      "|            * Built backend APIs with Node.js and Prisma, integrating PostgreSQL",
-      "|            * Implemented CI/CD pipelines using Google Cloud (Cloud Run, Cloud Build, IAM)",
-      "|            * Automated deployments and testing via GitHub Actions",
-      "|            * Contributed to sprint planning, documentation, and DevOps processes",
-    ],
-  },
-  skills: {
-    lines: [
-      "★ Programming & Problem-Solving",
-      "  - Programming | Problem-Solving",
-      "  - Effective Communication",
-      "",
-      "★ Programming Languages",
-      "  - Python",
-      "  - JavaScript",
-      "  - Bash",
-      "  - PHP",
-      "",
-      "★ Frontend",
-      "  - React",
-      "  - Next.js",
-      "  - Vue",
-      "  - UI Frameworks: Material-UI / Ant Design / Bootstrap",
-      "  - Custom UI library development",
-      "",
-      "★ Backend & Data",
-      "  - Node.js",
-      "  - REST APIs",
-      "  - Prisma ORM",
-      "  - PostgreSQL",
-      "  - Microservice design & development",
-      "  - System & application integration",
-      "",
-      "★ DevOps, Cloud & CI/CD",
-      "  - Continuous Integration & Continuous Delivery (CI/CD)",
-      "  - GitHub Actions",
-      "  - Jenkins",
-      "  - Groovy scripts",
-      "  - Git",
-      "  - Docker | Docker Compose",
-      "  - Podman | Podman Compose",
-      "  - Google Cloud Platform (GCP)",
-      "",
-      "★ Automation, Ops & Reliability",
-      "  - Linux + Bash scripting",
-      "  - Linux system administration & kernel tuning",
-      "  - Service maintenance and monitoring",
-      "  - Service monitoring and logging",
-      "  - Unattended server installation",
-      "",
-      "★ IaC & Orchestration",
-      "  - Ansible",
-      "  - Airflow",
-      "",
-      "★ Testing & Quality Assurance",
-      "  - PyTest | PyUnit",
-      "  - Jest",
-      "",
-      "★ Hardware / BMC & Provisioning Tooling",
-      "  - Redfish API",
-      "  - Supermicro IPMI | HP IPMI",
-      "  - Cubic (create/modify installation images)",
-      "",
-      "★ Tooling",
-      "  - CLI tools: Vim, Linux commands",
-      "",
-      "★ Delivery",
-      "  - Full-stack software development",
-      "  - Project management (planning, execution, risk management)",
-    ],
-  },
-  projects: {
-    lines: [
-      "",
-      "Public (open-source):",
-      "  - Autobot — manage services from your phone",
-      "    - repo: https://github.com/ag913331/prod_autobot",
-      "",
-      "  - GitHub User Activity CLI — fetches and displays both public and private GitHub activity for a specific user",
-      "    - repo: https://github.com/ag913331/github-user-activity",
-      "",
-      "  - Ubuntu Autoinstall ISO — automates creation of a customized Ubuntu Server ISO with minimal user interaction",
-      "    - repo: https://github.com/ag913331/devops-roadmap/tree/main/ubuntu-autoinstall-iso",
-      "",
-      "Private (NDA): Details",
-      "  - Insurance Product Modeling Platform — Show project description",
-      "  - Automated Server OS Upgrade — Show project description",
-    ],
-  },
-  life: {
-    lines: [
-      "Outside of work:",
-      "  - Homelab tinkering, self-hosting, automation",
-      "  - Linux customization, CLI tooling",
-      "  - Learning systems design + security",
-    ],
-  },
-  help: {
-    lines: [
-      "Commands:",
-      ...AVAILABLE_COMMANDS.map((c) => (c === "download" ? `  - ${c}  # download my CV` : `  - ${c}`)),
-      "",
-      "Notes:",
-      "  - Commands are case-sensitive.",
-      "  - Use ↑ / ↓ to cycle history.",
-      "  - Use Ctrl+L to clear.",
-      "  - Use Tab to autocomplete commands.",
-    ],
-  },
+  "system --init": { nodes: systemInit() },
+  whoami: { nodes: whoami() },
+  contacts: { nodes: contacts() },
+  certifications: { nodes: certifications() },
+  education: { nodes: education() },
+  experience: { nodes: experience() },
+  languages: { nodes: languages() },
+  skills: { nodes: skills() },
+  projects: { nodes: projects() },
+  help: { nodes: help() },
 };
-
-

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "@/content/commands";
+import { action, blank, prose, text } from "@/content/format";
 import { formatLastLogin, makeId } from "@/lib/helpers";
 import { LIFE_PROMPT_LINE, PRIVATE_PROJECT_DESCRIPTIONS } from "@/content/constants";
 
@@ -20,8 +21,8 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
   const vimInputRef = useRef<HTMLInputElement | null>(null);
 
   const [entries, setEntries] = useState<Entry[]>(() => [
-    { kind: "output", id: makeId(), text: `Last login: ${formatLastLogin(bootDate)} on ttys001`, muted: true },
-    { kind: "output", id: makeId(), text: "" },
+    { kind: "output", id: makeId(), node: text(`Last login: ${formatLastLogin(bootDate)} on ttys001`, true) },
+    { kind: "output", id: makeId(), node: blank() },
   ]);
 
   const [value, setValue] = useState("");
@@ -47,18 +48,25 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
     inputRef.current?.focus();
   }, []);
 
-  const pushOutput = useCallback((lines: string[], muted?: boolean) => {
-    setEntries((prev) => [...prev, ...lines.map((text) => ({ kind: "output" as const, id: makeId(), text, muted }))]);
+  const pushNodes = useCallback((nodes: LineNode[]) => {
+    setEntries((prev) => [...prev, ...nodes.map((n) => ({ kind: "output" as const, id: makeId(), node: n }))]);
   }, []);
+
+  const pushText = useCallback(
+    (lines: string[], muted?: boolean) => {
+      pushNodes(lines.map((l) => text(l, muted)));
+    },
+    [pushNodes],
+  );
 
   const showPrivateProject = useCallback(
     (title: string) => {
       const lines = PRIVATE_PROJECT_DESCRIPTIONS[title];
       if (!lines) return;
-      pushOutput(["", ...lines]);
+      pushNodes([blank(), ...prose(lines)]);
       window.setTimeout(() => inputRef.current?.focus(), 0);
     },
-    [pushOutput],
+    [pushNodes],
   );
 
   const runCommand = useCallback(
@@ -68,10 +76,10 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
       if (!command) {
         if (lifeFlow.mode === "awaiting_consent") {
           if (!lifeFlow.termsViewed) {
-            pushOutput(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
+            pushText(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
             return;
           }
-          pushOutput(["Opening /life ..."], true);
+          pushText(["Opening /life ..."], true);
           setLifeFlow({ mode: "idle" });
           router.push("/life");
         }
@@ -88,22 +96,22 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
         const isNo = normalized === "n" || normalized === "no";
 
         if (!isYes && !isNo) {
-          pushOutput(["Please answer with Y or n."], true);
+          pushText(["Please answer with Y or n."], true);
           return;
         }
 
         if (isNo) {
-          pushOutput(["Aborted."], true);
+          pushText(["Aborted."], true);
           setLifeFlow({ mode: "idle" });
           return;
         }
 
         if (!lifeFlow.termsViewed) {
-          pushOutput(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
+          pushText(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
           return;
         }
 
-        pushOutput(["Opening /life ..."], true);
+        pushText(["Opening /life ..."], true);
         setLifeFlow({ mode: "idle" });
         router.push("/life");
         return;
@@ -115,12 +123,12 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
       }
 
       if (command === "clear") {
-        setEntries([{ kind: "output", id: makeId(), text: "" }]);
+        setEntries([{ kind: "output", id: makeId(), node: blank() }]);
         return;
       }
 
       if (command === "download") {
-        pushOutput(["Downloading cv.pdf ..."], true);
+        pushText(["Downloading cv.pdf ..."], true);
         const a = document.createElement("a");
         a.href = "/cv.pdf";
         a.download = "cv.pdf";
@@ -132,25 +140,28 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
       }
 
       if (command === "life") {
-        pushOutput([LIFE_PROMPT_LINE, ""], true);
+        const needle = "terms and conditions";
+        const idx = LIFE_PROMPT_LINE.indexOf(needle);
+        pushNodes([
+          {
+            parts: [LIFE_PROMPT_LINE.slice(0, idx), action("terms", needle), LIFE_PROMPT_LINE.slice(idx + needle.length)],
+            muted: true,
+          },
+          blank(true),
+        ]);
         setLifeFlow({ mode: "awaiting_consent", termsViewed: false });
-        return;
-      }
-
-      if (command === "help") {
-        pushOutput(TERMINAL_COMMANDS.help.lines);
         return;
       }
 
       const exact = TERMINAL_COMMANDS[command];
       if (exact) {
-        pushOutput(exact.lines);
+        pushNodes(exact.nodes);
         return;
       }
 
-      pushOutput([`Command not found: ${command}`, "Type 'help' to list available commands."], true);
+      pushText([`Command not found: ${command}`, "Type 'help' to list available commands."], true);
     },
-    [lifeFlow, onClose, pushOutput, router],
+    [lifeFlow, onClose, pushNodes, pushText, router],
   );
 
   const onSubmit = useCallback(() => {
@@ -169,9 +180,9 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
 
     setVimCommand("");
     setLifeFlow({ mode: "awaiting_consent", termsViewed: true });
-    pushOutput(["Terms closed. Continue? Y/n"], true);
+    pushText(["Terms closed. Continue? Y/n"], true);
     window.setTimeout(() => inputRef.current?.focus(), 0);
-  }, [pushOutput, vimCommand]);
+  }, [pushText, vimCommand]);
 
   const onTerminalKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -244,12 +255,8 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
         setEntries((prev) => [
           ...prev,
           { kind: "input", id: makeId(), command: bootCommand },
-          ...TERMINAL_COMMANDS[bootCommand].lines.map((text) => ({
-            kind: "output" as const,
-            id: makeId(),
-            text,
-          })),
-          { kind: "output", id: makeId(), text: "" },
+          ...TERMINAL_COMMANDS[bootCommand].nodes.map((n) => ({ kind: "output" as const, id: makeId(), node: n })),
+          { kind: "output", id: makeId(), node: blank() },
         ]);
 
         setHistory([bootCommand]);
@@ -296,5 +303,3 @@ export function useTerminalController({ onClose }: { onClose?: () => void }) {
     closeTerminal: onClose,
   };
 }
-
-

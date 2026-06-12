@@ -1,6 +1,6 @@
 "use client";
 
-import { LIFE_PROMPT_LINE, TERMS_TEXT } from "@/content/constants";
+import { TERMS_TEXT } from "@/content/constants";
 import { useTerminalController } from "@/features/terminal/useTerminalController";
 import { createTerminalRenderers } from "@/features/terminal/renderers";
 import { Prompt } from "@/features/prompt/Prompt";
@@ -11,16 +11,11 @@ import styles from "./Terminal.module.css";
 export function Terminal({ onClose }: { onClose?: () => void }) {
   const c = useTerminalController({ onClose });
 
-  const { renderOutputEntry } = createTerminalRenderers(
-    styles,
-    {
-      onTermsClick: c.onTermsClick,
-      onShowPrivateProject: c.showPrivateProject,
-      onShowNdaDetails: () => c.showPrivateProject("Private project (NDA)"),
-      getDegreeClass: (idx) => (idx === 1 ? styles.degree1 : idx === 2 ? styles.degree2 : styles.degree3),
-    },
-    LIFE_PROMPT_LINE,
-  );
+  const { renderOutputEntry } = createTerminalRenderers(styles, {
+    onTermsClick: c.onTermsClick,
+    onShowPrivateProject: c.showPrivateProject,
+    onShowNdaDetails: () => c.showPrivateProject("Private project (NDA)"),
+  });
 
   return (
     <TerminalView
