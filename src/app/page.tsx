@@ -1,226 +1,34 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { BootWindow } from "@/features/boot/BootWindow";
-import { Terminal } from "@/features/terminal/Terminal";
-import { Button } from "@/components/Button/Button";
+import { useState } from "react";
 import Link from "next/link";
-import { makeId } from "@/lib/helpers";
-import { MAX_TERMINALS } from "@/content/constants";
+import { BootWindow } from "@/features/boot/BootWindow";
+import { Button } from "@/components/Button/Button";
+import { Desktop } from "@/features/desktop/Desktop";
+import { useWindowManager } from "@/features/desktop/useWindowManager";
 import styles from "./page.module.css";
-
-import {
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  DragStartEvent,
-  useDraggable,
-} from "@dnd-kit/core";
-
-type TerminalWindow = {
-  id: string;
-  dx: number;
-  dy: number;
-  z: number;
-};
-
-function DraggableTerminalWindow({
-  w,
-  bringToFront,
-  closeWindow,
-}: {
-  w: TerminalWindow;
-  bringToFront: (id: string) => void;
-  closeWindow: (id: string) => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: w.id });
-
-  const x = w.dx + (transform?.x ?? 0);
-  const y = w.dy + (transform?.y ?? 0);
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={styles.terminalWindow}
-      style={{
-        zIndex: w.z,
-        transform: `translate3d(${x}px, ${y}px, 0)`,
-        // optional: nicer drag feel
-        transition: isDragging ? "none" : "transform 120ms ease-out",
-      }}
-      {...attributes}
-      {...listeners}
-      onClick={() => bringToFront(w.id)}
-    >
-      <div className={styles.terminalWindowInner}>
-        <Terminal onClose={() => closeWindow(w.id)} />
-      </div>
-    </div>
-  );
-}
 
 export default function Home() {
   const [hasBooted, setHasBooted] = useState(false);
-  const [windows, setWindows] = useState<TerminalWindow[]>([]);
-  const [tooManyModalOpen, setTooManyModalOpen] = useState(false);
-  const lastSpawnAtRef = useRef(0);
+  const wm = useWindowManager({ enabled: hasBooted });
 
-  const canSpawn = windows.length < MAX_TERMINALS;
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 4 }, // prevents accidental drags on click
-    })
-  );
-
-  const spawnTerminal = useCallback(() => {
-    setWindows((prev) => {
-      if (prev.length >= MAX_TERMINALS) return prev;
-
-      const maxZ = prev.reduce((m, w) => Math.max(m, w.z), 0);
-      const i = prev.length;
-      const step = 50;
-      const maxOffset = 72;
-      const dx = Math.min(i * step, maxOffset);
-      const dy = Math.min(i * step, maxOffset);
-
-      const next: TerminalWindow = { id: makeId(), dx, dy, z: maxZ + 1 };
-      return [...prev, next];
-    });
-  }, []);
-
-  const bringToFront = useCallback((id: string) => {
-    setWindows((prev) => {
-      const maxZ = prev.reduce((m, w) => Math.max(m, w.z), 0);
-      return prev.map((w) => (w.id === id ? { ...w, z: maxZ + 1 } : w));
-    });
-  }, []);
-
-  const closeWindow = useCallback((id: string) => {
-    setWindows((prev) => prev.filter((w) => w.id !== id));
-  }, []);
-
-  const onDragStart = useCallback(
-    (e: DragStartEvent) => {
-      bringToFront(String(e.active.id));
-    },
-    [bringToFront]
-  );
-
-  const onDragEnd = useCallback((e: DragEndEvent) => {
-    const id = String(e.active.id);
-    const { x, y } = e.delta;
-
-    setWindows((prev) =>
-      prev.map((w) =>
-        w.id === id ? { ...w, dx: w.dx + x, dy: w.dy + y } : w
-      )
-    );
-  }, []);
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (!hasBooted) return;
-
-      const isCtrlT = e.ctrlKey && (e.key === "t" || e.key === "T");
-      if (!isCtrlT) return;
-
-      e.preventDefault();
-      if (tooManyModalOpen) return;
-
-      const now = Date.now();
-      if (now - lastSpawnAtRef.current < 250) return;
-      lastSpawnAtRef.current = now;
-
-      if (windows.length >= MAX_TERMINALS) {
-        setTooManyModalOpen(true);
-        return;
-      }
-
-      spawnTerminal();
-    }
-
-    function onKeyUp(e: KeyboardEvent) {
-      if (e.key === "Escape") setTooManyModalOpen(false);
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-    };
-  }, [hasBooted, spawnTerminal, tooManyModalOpen, windows.length]);
-
-  const hasAnyTerminal = windows.length > 0;
+  const hasAnyTerminal = wm.windows.length > 0;
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         {!hasBooted ? (
-          <section
-            className={styles.terminalStage}
-            aria-label="Preparing environment"
-          >
+          <section className={styles.terminalStage} aria-label="Preparing environment">
             <BootWindow
               onDone={() => {
                 setHasBooted(true);
-                window.setTimeout(() => spawnTerminal(), 0);
+                window.setTimeout(() => wm.spawnTerminal(), 0);
               }}
             />
           </section>
         ) : hasAnyTerminal ? (
           <section className={styles.terminalStage} aria-label="Terminal windows">
-            <DndContext
-              sensors={sensors}
-              onDragStart={onDragStart}
-              onDragEnd={onDragEnd}
-            >
-              {windows.map((w) => (
-                <DraggableTerminalWindow
-                  key={w.id}
-                  w={w}
-                  bringToFront={bringToFront}
-                  closeWindow={closeWindow}
-                />
-              ))}
-            </DndContext>
-
-            {tooManyModalOpen ? (
-              <div
-                className={styles.modalBackdrop}
-                role="dialog"
-                aria-modal="true"
-                aria-label="Too many terminals"
-              >
-                <div className={styles.modal}>
-                  <div className={styles.modalTitle}>Wooha, hold on buddy…</div>
-                  <p className={styles.modalText}>
-                    What are you going to do with so many terminals? (Max{" "}
-                    {MAX_TERMINALS}.)
-                  </p>
-                  <div className={styles.modalActions}>
-                    <Button variant="solid" onClick={() => setTooManyModalOpen(false)}>
-                      OK
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      disabled={canSpawn}
-                      onClick={() => {
-                        setTooManyModalOpen(false);
-                        setWindows((prev) => (prev.length ? prev.slice(1) : prev));
-                        window.setTimeout(() => spawnTerminal(), 0);
-                      }}
-                    >
-                      Replace oldest
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ) : null}
+            <Desktop manager={wm} />
           </section>
         ) : (
           <section className={styles.landing} aria-label="Welcome">
@@ -232,7 +40,7 @@ export default function Home() {
               </p>
 
               <div className={styles.actions}>
-                <Button variant="solid" className={styles.openBtn} onClick={spawnTerminal}>
+                <Button variant="solid" className={styles.openBtn} onClick={wm.spawnTerminal}>
                   $: Open terminal
                 </Button>
 
