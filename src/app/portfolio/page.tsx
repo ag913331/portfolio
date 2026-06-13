@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ScrollSpine } from "@/features/portfolio/ScrollSpine";
 import { ThemeToggle } from "@/features/portfolio/ThemeToggle";
+import { PrivateProjects } from "@/features/portfolio/PrivateProjects";
 import { toHref } from "@/lib/helpers";
 import {
   CERTIFICATIONS,
@@ -9,7 +10,6 @@ import {
   EDUCATION,
   EXPERIENCE,
   LANGUAGES,
-  PRIVATE_PROJECTS,
   PROFILE,
   PUBLIC_PROJECTS,
   SKILLS,
@@ -149,10 +149,9 @@ export default function PortfolioPage() {
               </a>
             ))}
           </div>
-          <p className={styles.note}>
-            Additional large-scale work is under NDA: {PRIVATE_PROJECTS.map((p) => p.title).join(", ")}. Happy to
-            discuss high-level responsibilities and outcomes in private.
-          </p>
+          <div className={styles.privateBlock}>
+            <PrivateProjects />
+          </div>
         </section>
 
         <div className={styles.split}>

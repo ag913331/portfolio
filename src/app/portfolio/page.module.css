@@ -295,13 +295,8 @@
   color: rgba(var(--accent), 0.95);
 }
 
-.note {
-  margin-top: 16px;
-  font-size: 14px;
-  line-height: 1.6;
-  color: rgba(var(--muted), 0.9);
-  border-left: 2px solid rgba(var(--accent), 0.4);
-  padding-left: 12px;
+.privateBlock {
+  margin-top: 28px;
 }
 
 /* --- Certifications --- */
