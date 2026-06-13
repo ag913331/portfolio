@@ -185,8 +185,7 @@ export const EXPERIENCE: Experience[] = [
   {
     role: "Fullstack & Cloud DevOps Engineer",
     type: "Full-time",
-    period: "Nov 2024 - Current",
-    current: true,
+    period: "Nov 2024 - May 2026",
     company: "BuildColab",
     location: "Varna, Bulgaria",
     description: [
@@ -195,6 +194,17 @@ export const EXPERIENCE: Experience[] = [
       "Implemented CI/CD pipelines using Google Cloud (Cloud Run, Cloud Build, IAM)",
       "Automated deployments and testing via GitHub Actions",
       "Contributed to sprint planning, documentation, and DevOps processes",
+    ],
+  },
+  {
+    role: "Freelance Fullstack & DevOps Engineer",
+    type: "Freelance",
+    period: "May 2026 - Current",
+    current: true,
+    company: "Self-employed",
+    location: "Remote",
+    description: [
+      "Partnering with clients on full-stack product development and DevOps automation.",
     ],
   },
 ];
