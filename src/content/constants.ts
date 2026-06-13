@@ -5,6 +5,31 @@ export const USER = "alexandro";
 export const HOST = "localhost";
 
 export const PRIVATE_PROJECT_DESCRIPTIONS: Record<string, string[]> = {
+  "Construction Management SaaS Platform": [
+    " ",
+    "Construction Management SaaS Platform (private / NDA)",
+    "",
+    "A multi-tenant SaaS platform for the construction industry that brings companies, projects, tenders, contracts and payments into a single collaborative workspace.",
+    "I joined early and owned a broad slice of the stack — from cloud architecture and CI/CD through to the frontend, backend services, and a shared UI library.",
+    "",
+    "★ Duration: ~18 months",
+    "★ Stack: Next.js, Node.js, Prisma, PostgreSQL, Docker, Google Cloud (Cloud Run, Cloud SQL, Cloud Storage, Cloud Build, Artifact Registry, Secret Manager)",
+    "★ Collaborators (teams): Dev, Product, Design, Construction domain experts",
+    "★ Responsibilities:",
+    "  (1) Set up the project and its architecture from the ground up.",
+    "  (2) Chose the cloud platform and provisioned compute, storage and database — containerized services on Cloud Run, PostgreSQL on Cloud SQL, and per-company/per-project file storage on Cloud Storage.",
+    "  (3) Built and maintained the CI/CD pipeline (Cloud Build triggers → Artifact Registry → Cloud Run) for automated builds and deploys from GitHub.",
+    "  (4) Developed the frontend in Next.js across multiple product domains (projects, companies, bill of quantities, offer requests, contracting).",
+    "  (5) Created and maintained a shared UI component library to keep the product consistent and speed up delivery.",
+    "  (6) Designed and built an in-app file manager backed by Cloud Storage, with a hierarchical folder/file tree per company and project.",
+    "  (7) Set up transactional email notifications.",
+    "  (8) Implemented backend code and services — REST APIs and domain logic on Node.js, Prisma and PostgreSQL.",
+    "  (9) Wrote technical documentation: deployment strategy, architecture/domain maps, ADRs and module specs.",
+    "★ Impact:",
+    "  Took the platform from initial setup to a deployed, continuously-shipped product, establishing the cloud foundation, delivery pipeline and shared frontend tooling the team builds on day to day.",
+    "",
+    "Note: Source code and deeper implementation details are private due to NDA.",
+  ],
   "Insurance Product Modeling Platform": [
     " ",
     "Insurance Product Modeling Platform (private / NDA)",

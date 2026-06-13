@@ -186,7 +186,7 @@ export const EXPERIENCE: Experience[] = [
     role: "Fullstack & Cloud DevOps Engineer",
     type: "Full-time",
     period: "Nov 2024 - May 2026",
-    company: "BuildColab",
+    company: "NG Coding",
     location: "Varna, Bulgaria",
     description: [
       "Developed frontend apps using React, Next.js, and TanStack React Query",
@@ -315,6 +315,7 @@ export const PUBLIC_PROJECTS: PublicProject[] = [
 
 /** Titles must match the keys of PRIVATE_PROJECT_DESCRIPTIONS in constants.ts. */
 export const PRIVATE_PROJECTS: { title: string }[] = [
+  { title: "Construction Management SaaS Platform" },
   { title: "Insurance Product Modeling Platform" },
   { title: "Automated Server OS Upgrade" },
 ];
