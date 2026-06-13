@@ -10,6 +10,7 @@ export type TerminalWindow = {
   dx: number;
   dy: number;
   z: number;
+  minimized?: boolean;
 };
 
 export type WindowManager = ReturnType<typeof useWindowManager>;
@@ -52,6 +53,22 @@ export function useWindowManager({ enabled }: { enabled: boolean }) {
   const closeWindow = useCallback((id: string) => {
     setWindows((prev) => prev.filter((w) => w.id !== id));
   }, []);
+
+  const minimizeWindow = useCallback((id: string) => {
+    setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, minimized: true } : w)));
+  }, []);
+
+  const restoreWindow = useCallback((id: string) => {
+    setWindows((prev) => {
+      const maxZ = prev.reduce((m, w) => Math.max(m, w.z), 0);
+      return prev.map((w) => (w.id === id ? { ...w, minimized: false, z: maxZ + 1 } : w));
+    });
+  }, []);
+
+  // The frontmost non-minimized window is "focused"; others are dimmed.
+  const focusedId =
+    windows.filter((w) => !w.minimized).reduce<TerminalWindow | null>((top, w) => (!top || w.z > top.z ? w : top), null)
+      ?.id ?? null;
 
   const replaceOldest = useCallback(() => {
     setTooManyModalOpen(false);
@@ -110,9 +127,12 @@ export function useWindowManager({ enabled }: { enabled: boolean }) {
   return {
     windows,
     canSpawn,
+    focusedId,
     spawnTerminal,
     bringToFront,
     closeWindow,
+    minimizeWindow,
+    restoreWindow,
     replaceOldest,
     onDragStart,
     onDragEnd,

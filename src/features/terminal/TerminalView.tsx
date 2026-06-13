@@ -20,6 +20,7 @@ export type TerminalViewBaseController = {
   setIsMaximized: (next: boolean) => void;
 
   isOverlayOpen: boolean;
+  promptPath: string;
 
   inputRef: React.RefObject<HTMLInputElement | null>;
   bottomRef: React.RefObject<HTMLDivElement | null>;
@@ -29,11 +30,12 @@ export type TerminalViewBaseController = {
   onTerminalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 
   closeTerminal?: () => void;
+  minimizeTerminal?: () => void;
 };
 
 export type TerminalViewProps<C extends TerminalViewBaseController = TerminalViewBaseController> = {
   controller: C;
-  PromptComponent: ComponentType;
+  PromptComponent: ComponentType<{ path?: string }>;
   renderOutputEntry: (e: Extract<Entry, { kind: "output" }>) => ReactNode;
 
   chromeTitle?: string;
@@ -59,12 +61,14 @@ export function TerminalView<C extends TerminalViewBaseController>({
     isMaximized,
     setIsMaximized,
     isOverlayOpen,
+    promptPath,
     inputRef,
     bottomRef,
     focusInput,
     onSubmit,
     onTerminalKeyDown,
     closeTerminal,
+    minimizeTerminal,
   } = controller;
 
   return (
@@ -89,10 +93,9 @@ export function TerminalView<C extends TerminalViewBaseController>({
               variant="unstyled"
               type="button"
               className={styles.dotButton}
-              aria-label="Restore size"
-              title="Restore size"
-              disabled={!isMaximized}
-              onClick={() => setIsMaximized(false)}
+              aria-label="Minimize terminal"
+              title="Minimize"
+              onClick={() => minimizeTerminal?.()}
             >
               <span className={`${styles.dot} ${styles.dotYellow}`} />
             </Button>
@@ -101,10 +104,9 @@ export function TerminalView<C extends TerminalViewBaseController>({
               variant="unstyled"
               type="button"
               className={styles.dotButton}
-              aria-label="Maximize"
-              title="Maximize"
-              disabled={isMaximized}
-              onClick={() => setIsMaximized(true)}
+              aria-label={isMaximized ? "Restore size" : "Maximize"}
+              title={isMaximized ? "Restore" : "Maximize"}
+              onClick={() => setIsMaximized(!isMaximized)}
             >
               <span className={`${styles.dot} ${styles.dotGreen}`} />
             </Button>
@@ -117,7 +119,7 @@ export function TerminalView<C extends TerminalViewBaseController>({
               if (e.kind === "output") return renderOutputEntry(e);
               return (
                 <span key={e.id} className={styles.line}>
-                  <PromptComponent />
+                  <PromptComponent path={e.path} />
                   {e.command}
                 </span>
               );
@@ -143,7 +145,7 @@ export function TerminalView<C extends TerminalViewBaseController>({
             <label className={styles.srOnly} htmlFor="terminal-input">
               Terminal input
             </label>
-            <PromptComponent />
+            <PromptComponent path={promptPath} />
             <div className={styles.inputWrap}>
               <div className={styles.ghost} aria-hidden="true">
                 {suggestion ? (

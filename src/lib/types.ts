@@ -1,6 +1,6 @@
 declare global {
   /** A semantically-emphasized inline span; maps to a CSS module class in the renderer. */
-  type EmTone = "status" | "period" | "periodCurrent" | "institution" | "degree1" | "degree2" | "degree3";
+  type EmTone = "status" | "period" | "periodCurrent" | "institution" | "degree1" | "degree2" | "degree3" | "dir";
 
   /** A single piece of inline content within an output line. */
   type Inline =
@@ -19,7 +19,9 @@ declare global {
   type CommandOutput = { nodes: LineNode[] };
   type TerminalCommands = Record<string, CommandOutput>;
 
-  type Entry = { kind: "output"; id: string; node: LineNode } | { kind: "input"; id: string; command: string };
+  type Entry =
+    | { kind: "output"; id: string; node: LineNode }
+    | { kind: "input"; id: string; command: string; path?: string };
 
   type CSSModuleClasses = Record<string, string>;
 

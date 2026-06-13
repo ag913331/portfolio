@@ -5,11 +5,12 @@ import { useTerminalController } from "@/features/terminal/useTerminalController
 import { createTerminalRenderers } from "@/features/terminal/renderers";
 import { Prompt } from "@/features/prompt/Prompt";
 import { TerminalView } from "@/features/terminal/TerminalView";
+import { MatrixOverlay } from "@/features/terminal/MatrixOverlay";
 
 import styles from "./Terminal.module.css";
 
-export function Terminal({ onClose }: { onClose?: () => void }) {
-  const c = useTerminalController({ onClose });
+export function Terminal({ onClose, onMinimize }: { onClose?: () => void; onMinimize?: () => void }) {
+  const c = useTerminalController({ onClose, onMinimize });
 
   const { renderOutputEntry } = createTerminalRenderers(styles, {
     onTermsClick: c.onTermsClick,
@@ -29,42 +30,46 @@ export function Terminal({ onClose }: { onClose?: () => void }) {
           . Use <code>↑</code>/<code>↓</code> for history. Use <code>Ctrl+L</code> to clear the screen.
         </>
       }
-      renderOverlay={(cc) =>
-        cc.lifeFlow.mode === "show_terms" ? (
-          <div className={styles.overlayBackdrop} role="dialog" aria-modal="true">
-            <div className={styles.vimWindow}>
-              <div className={styles.vimHeader}>vim — terms-and-conditions</div>
+      renderOverlay={(cc) => (
+        <>
+          {cc.lifeFlow.mode === "show_terms" ? (
+            <div className={styles.overlayBackdrop} role="dialog" aria-modal="true">
+              <div className={styles.vimWindow}>
+                <div className={styles.vimHeader}>vim — terms-and-conditions</div>
 
-              <div className={styles.vimBody}>
-                <pre className={styles.vimText}>{TERMS_TEXT.join("\n")}</pre>
+                <div className={styles.vimBody}>
+                  <pre className={styles.vimText}>{TERMS_TEXT.join("\n")}</pre>
+                </div>
+
+                <form
+                  className={styles.vimFooter}
+                  onSubmit={(ev) => {
+                    ev.preventDefault();
+                    cc.onVimSubmit();
+                  }}
+                >
+                  <span className={styles.vimPrompt} aria-hidden="true">
+                    :
+                  </span>
+                  <input
+                    ref={cc.vimInputRef}
+                    className={styles.vimInput}
+                    value={cc.vimCommand}
+                    onChange={(e) => cc.setVimCommand(e.target.value)}
+                    autoCapitalize="none"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    placeholder="q to quit"
+                  />
+                </form>
               </div>
-
-              <form
-                className={styles.vimFooter}
-                onSubmit={(ev) => {
-                  ev.preventDefault();
-                  cc.onVimSubmit();
-                }}
-              >
-                <span className={styles.vimPrompt} aria-hidden="true">
-                  :
-                </span>
-                <input
-                  ref={cc.vimInputRef}
-                  className={styles.vimInput}
-                  value={cc.vimCommand}
-                  onChange={(e) => cc.setVimCommand(e.target.value)}
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  placeholder="q to quit"
-                />
-              </form>
             </div>
-          </div>
-        ) : null
-      }
+          ) : null}
+
+          {cc.matrixOpen ? <MatrixOverlay onClose={cc.closeMatrix} /> : null}
+        </>
+      )}
     />
   );
 }

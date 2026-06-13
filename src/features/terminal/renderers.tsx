@@ -10,6 +10,7 @@ const TONE_TO_STYLE: Record<EmTone, string> = {
   degree1: "degree1",
   degree2: "degree2",
   degree3: "degree3",
+  dir: "institutionValue",
 };
 
 export function createTerminalRenderers(styles: CSSModuleClasses, callbacks: RendererCallbacks) {

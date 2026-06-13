@@ -24,14 +24,37 @@ export const AVAILABLE_COMMANDS = [
   "life",
   "projects",
   "skills",
+  "neofetch",
+  "theme",
+  "matrix",
+  "ls",
+  "cd",
+  "cat",
+  "pwd",
+  "tree",
   "help",
   "clear",
   "exit",
   "system --init",
 ] as const;
 
-// Commands surfaced in the `system --init` banner (everything the visitor can explore).
-const MENU_COMMANDS = AVAILABLE_COMMANDS.filter((c) => !["help", "clear", "exit", "system --init"].includes(c));
+// The résumé commands surfaced in the `system --init` banner. Shell/fun commands
+// are advertised separately in the tips so the banner stays focused.
+const BANNER_HIDDEN = [
+  "help",
+  "clear",
+  "exit",
+  "system --init",
+  "neofetch",
+  "theme",
+  "matrix",
+  "ls",
+  "cd",
+  "cat",
+  "pwd",
+  "tree",
+];
+const MENU_COMMANDS = AVAILABLE_COMMANDS.filter((c) => !BANNER_HIDDEN.includes(c));
 
 function systemInit(): LineNode[] {
   return [
@@ -49,8 +72,8 @@ function systemInit(): LineNode[] {
     blank(),
     text("Tip:"),
     text("  - Type 'help' to list commands."),
-    text("  - Type 'clear' to clear the screen."),
-    text("  - Type 'exit' to exit the terminal."),
+    text("  - Explore as a real shell: ls, cd, cat, tree"),
+    text("  - For fun: neofetch, theme <name>, matrix"),
     text("  - Use Ctrl+T to open a new terminal window."),
     text("  - Use Ctrl+L to clear the screen."),
   ];

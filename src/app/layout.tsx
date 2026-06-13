@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { THEMES } from "@/content/themes";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,13 +18,19 @@ export const metadata: Metadata = {
   description: "Full-stack • DevOps • Linux — interactive terminal portfolio",
 };
 
+// Applies the saved theme before first paint to avoid a flash of the default palette.
+const themeInitScript = `(function(){try{var T=${JSON.stringify(THEMES)};var n=localStorage.getItem('portfolio-theme');var t=T[n];if(t){var r=document.documentElement;for(var k in t){r.style.setProperty(k,t[k]);}}}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
     </html>
   );
