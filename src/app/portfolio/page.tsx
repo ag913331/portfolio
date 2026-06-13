@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ScrollSpine } from "@/features/portfolio/ScrollSpine";
 import { toHref } from "@/lib/helpers";
 import {
   CERTIFICATIONS,
@@ -45,6 +46,8 @@ function ContactLinks({ className }: { className?: string }) {
 export default function PortfolioPage() {
   return (
     <div className={styles.page}>
+      <ScrollSpine />
+
       <header className={styles.nav}>
         <span className={styles.navName}>{PROFILE.name}</span>
         <div className={styles.navLinks}>

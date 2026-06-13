@@ -1,0 +1,31 @@
+.spine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.rail {
+  stroke: rgba(var(--accent), 0.14);
+  stroke-width: 1.5;
+}
+
+.trail {
+  stroke: rgba(var(--accent), 0.7);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.dot {
+  fill: rgba(var(--accent), 1);
+}
+
+/* Decorative only — hide on small screens where it would crowd the content. */
+@media (max-width: 768px) {
+  .spine {
+    display: none;
+  }
+}
