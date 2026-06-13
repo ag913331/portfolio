@@ -69,6 +69,18 @@
   transform: translateY(-1px);
 }
 
+.altLink {
+  margin-top: 18px;
+  font-size: 14px;
+  color: rgba(var(--muted), 0.9);
+}
+
+.altLink a {
+  color: rgba(var(--accent), 0.95);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 @media (max-width: 480px) {
   .inner {
     padding: 22px 18px;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { BootWindow } from "@/features/boot/BootWindow";
 import { Desktop } from "@/features/desktop/Desktop";
 import { useWindowManager } from "@/features/desktop/useWindowManager";
@@ -15,6 +16,10 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <Link href="/portfolio" className={styles.traditionalLink}>
+        Not a fan of terminals? View the traditional layout →
+      </Link>
+
       <main className={styles.main}>
         {!hasBooted ? (
           <section className={styles.terminalStage} aria-label="Preparing environment">

@@ -293,6 +293,12 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
         return;
       }
 
+      if (cmd === "portfolio") {
+        pushText(["Opening traditional layout ..."], true);
+        router.push("/portfolio");
+        return;
+      }
+
       if (cmd === "sudo") {
         pushText([`[sudo] password for ${USER}:`, "nice try 😏"], true);
         return;

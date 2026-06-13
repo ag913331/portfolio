@@ -19,6 +19,10 @@ export function Landing({ onOpenTerminal }: { onOpenTerminal: () => void }) {
             $: Download CV
           </Link>
         </div>
+
+        <p className={surface.altLink}>
+          If you want a more traditional layout, <Link href="/portfolio">click here</Link>.
+        </p>
       </div>
     </section>
   );

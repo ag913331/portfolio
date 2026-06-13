@@ -27,6 +27,7 @@ export const AVAILABLE_COMMANDS = [
   "neofetch",
   "theme",
   "matrix",
+  "portfolio",
   "ls",
   "cd",
   "cat",
@@ -48,6 +49,7 @@ const BANNER_HIDDEN = [
   "neofetch",
   "theme",
   "matrix",
+  "portfolio",
   "ls",
   "cd",
   "cat",
@@ -74,6 +76,7 @@ function systemInit(): LineNode[] {
     text("  - Type 'help' to list commands."),
     text("  - Explore as a real shell: ls, cd, cat, tree"),
     text("  - For fun: neofetch, theme <name>, matrix"),
+    text("  - Prefer a classic layout? Type 'portfolio'."),
     text("  - Use Ctrl+T to open a new terminal window."),
     text("  - Use Ctrl+L to clear the screen."),
   ];
