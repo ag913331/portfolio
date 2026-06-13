@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { THEMES } from "@/content/themes";
+import { PROFILE } from "@/content/resume";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Terminal",
-  description: "Full-stack • DevOps • Linux — interactive terminal portfolio",
+  title: `${PROFILE.name} — ${PROFILE.role}`,
+  description:
+    "Interactive terminal-style portfolio of Alexandro Georgiev — full-stack development, DevOps, and Linux automation.",
 };
 
 // Applies the saved theme before first paint to avoid a flash of the default palette.
