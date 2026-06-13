@@ -3,15 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AVAILABLE_COMMANDS, TERMINAL_COMMANDS } from "@/content/commands";
-import { action, blank, em, node, prose, text } from "@/content/format";
+import { blank, em, node, prose, text } from "@/content/format";
 import { buildNeofetch } from "@/content/neofetch";
 import { completePath, cwdToDisplay, lsNodes, resolve, treeNodes } from "@/content/fs";
 import { THEME_NAMES } from "@/content/themes";
 import { applyTheme, getStoredTheme } from "@/lib/theme";
 import { formatLastLogin, makeId } from "@/lib/helpers";
-import { HOST, LIFE_PROMPT_LINE, PRIVATE_PROJECT_DESCRIPTIONS, USER } from "@/content/constants";
-
-type LifeFlowState = { mode: "idle" } | { mode: "awaiting_consent"; termsViewed: boolean } | { mode: "show_terms" };
+import { HOST, PRIVATE_PROJECT_DESCRIPTIONS, USER } from "@/content/constants";
 
 const PATH_COMMANDS = /^(cd|ls|cat|tree)\s+(\S*)$/;
 
@@ -45,7 +43,6 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const vimInputRef = useRef<HTMLInputElement | null>(null);
 
   const [entries, setEntries] = useState<Entry[]>(() => [
     { kind: "output", id: makeId(), node: text(`Last login: ${formatLastLogin(bootDate)} on ttys001`, true) },
@@ -58,13 +55,11 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
   const [isBooting, setIsBooting] = useState(true);
   const [bootTyped, setBootTyped] = useState("");
   const [isMaximized, setIsMaximized] = useState(false);
-  const [lifeFlow, setLifeFlow] = useState<LifeFlowState>({ mode: "idle" });
-  const [vimCommand, setVimCommand] = useState("");
   const [cwd, setCwd] = useState<string[]>([]);
   const [matrixOpen, setMatrixOpen] = useState(false);
 
   const promptPath = cwdToDisplay(cwd);
-  const isOverlayOpen = lifeFlow.mode === "show_terms" || matrixOpen;
+  const isOverlayOpen = matrixOpen;
 
   const suggestion = useMemo(() => {
     const q = value.trim();
@@ -181,50 +176,11 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
   const runCommand = useCallback(
     (raw: string) => {
       const command = raw.trim();
-
-      if (!command) {
-        if (lifeFlow.mode === "awaiting_consent") {
-          if (!lifeFlow.termsViewed) {
-            pushText(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
-            return;
-          }
-          pushText(["Opening /life ..."], true);
-          setLifeFlow({ mode: "idle" });
-          router.push("/life");
-        }
-        return;
-      }
+      if (!command) return;
 
       setEntries((prev) => [...prev, { kind: "input", id: makeId(), command, path: cwdToDisplay(cwd) }]);
       setHistory((prev) => (prev[prev.length - 1] === command ? prev : [...prev, command]));
       setHistoryIdx(null);
-
-      if (lifeFlow.mode === "awaiting_consent") {
-        const normalized = command.toLowerCase();
-        const isYes = normalized === "y" || normalized === "yes";
-        const isNo = normalized === "n" || normalized === "no";
-
-        if (!isYes && !isNo) {
-          pushText(["Please answer with Y or n."], true);
-          return;
-        }
-
-        if (isNo) {
-          pushText(["Aborted."], true);
-          setLifeFlow({ mode: "idle" });
-          return;
-        }
-
-        if (!lifeFlow.termsViewed) {
-          pushText(["Please view the terms and conditions first (click the link), then answer Y/n."], true);
-          return;
-        }
-
-        pushText(["Opening /life ..."], true);
-        setLifeFlow({ mode: "idle" });
-        router.push("/life");
-        return;
-      }
 
       if (command === "exit") {
         onClose?.();
@@ -249,20 +205,8 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
       }
 
       if (command === "life") {
-        const needle = "terms and conditions";
-        const idx = LIFE_PROMPT_LINE.indexOf(needle);
-        pushNodes([
-          {
-            parts: [
-              LIFE_PROMPT_LINE.slice(0, idx),
-              action("terms", needle),
-              LIFE_PROMPT_LINE.slice(idx + needle.length),
-            ],
-            muted: true,
-          },
-          blank(true),
-        ]);
-        setLifeFlow({ mode: "awaiting_consent", termsViewed: false });
+        pushText(["Opening /life ..."], true);
+        router.push("/life");
         return;
       }
 
@@ -317,7 +261,7 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
 
       pushText([`Command not found: ${command}`, "Type 'help' to list available commands."], true);
     },
-    [cwd, lifeFlow, onClose, pushNodes, pushText, router, runFs, runTheme],
+    [cwd, onClose, pushNodes, pushText, router, runFs, runTheme],
   );
 
   const onSubmit = useCallback(() => {
@@ -325,20 +269,6 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
     setValue("");
     runCommand(cmd);
   }, [runCommand, value]);
-
-  const onTermsClick = useCallback(() => {
-    setLifeFlow({ mode: "show_terms" });
-  }, []);
-
-  const onVimSubmit = useCallback(() => {
-    const cmd = vimCommand.trim();
-    if (cmd !== ":q") return;
-
-    setVimCommand("");
-    setLifeFlow({ mode: "awaiting_consent", termsViewed: true });
-    pushText(["Terms closed. Continue? Y/n"], true);
-    window.setTimeout(() => inputRef.current?.focus(), 0);
-  }, [pushText, vimCommand]);
 
   const onTerminalKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -389,10 +319,6 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
   }, [entries.length]);
 
   useEffect(() => {
-    if (lifeFlow.mode === "show_terms") window.setTimeout(() => vimInputRef.current?.focus(), 0);
-  }, [lifeFlow.mode]);
-
-  useEffect(() => {
     const bootCommand = "system --init";
     const tickMs = 75;
 
@@ -437,25 +363,19 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
     isBooting,
     bootTyped,
     isMaximized,
-    lifeFlow,
     isOverlayOpen,
-    vimCommand,
-    setVimCommand,
     promptPath,
     matrixOpen,
 
     // refs
     inputRef,
     bottomRef,
-    vimInputRef,
 
     // handlers
     focusInput,
     onSubmit,
     runCommand,
     onTerminalKeyDown,
-    onTermsClick,
-    onVimSubmit,
     showPrivateProject,
     setIsMaximized,
     closeMatrix,

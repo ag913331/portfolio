@@ -1,0 +1,74 @@
+.wrap {
+  position: relative;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: rgba(var(--muted), 0.95);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.button:hover {
+  color: rgba(var(--text), 0.95);
+  border-color: rgba(var(--accent), 0.4);
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  flex: none;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  min-width: 150px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(var(--surface-1), 0.98);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  text-transform: capitalize;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: rgba(var(--text), 0.85);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 9px;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.active {
+  color: rgba(var(--accent), 0.95);
+}

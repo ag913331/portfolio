@@ -203,9 +203,7 @@ export const EXPERIENCE: Experience[] = [
     current: true,
     company: "Self-employed",
     location: "Remote",
-    description: [
-      "Partnering with clients on full-stack product development and DevOps automation.",
-    ],
+    description: ["Partnering with clients on full-stack product development and DevOps automation."],
   },
 ];
 

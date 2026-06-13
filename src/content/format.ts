@@ -16,7 +16,7 @@ export const node = (parts: Inline[], opts?: { muted?: boolean; block?: LineNode
 
 export const link = (href: string, label: string, external = true): Inline => ({ kind: "link", href, label, external });
 
-export const action = (kind: "terms" | "project" | "nda", label: string, arg?: string): Inline => ({
+export const action = (kind: "project" | "nda", label: string, arg?: string): Inline => ({
   kind: "action",
   action: kind,
   label,

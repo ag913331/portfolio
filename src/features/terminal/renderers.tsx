@@ -33,11 +33,7 @@ export function createTerminalRenderers(styles: CSSModuleClasses, callbacks: Ren
 
     if (part.kind === "action") {
       const onClick =
-        part.action === "terms"
-          ? callbacks.onTermsClick
-          : part.action === "nda"
-            ? callbacks.onShowNdaDetails
-            : () => callbacks.onShowPrivateProject(part.arg ?? "");
+        part.action === "nda" ? callbacks.onShowNdaDetails : () => callbacks.onShowPrivateProject(part.arg ?? "");
       return (
         <button key={key} type="button" className={styles.terminalActionButton} onClick={onClick}>
           {part.label}

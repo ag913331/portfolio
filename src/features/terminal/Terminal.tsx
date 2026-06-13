@@ -1,6 +1,6 @@
 "use client";
 
-import { HOST, TERMS_TEXT, USER } from "@/content/constants";
+import { HOST, USER } from "@/content/constants";
 import { useTerminalController } from "@/features/terminal/useTerminalController";
 import { createTerminalRenderers } from "@/features/terminal/renderers";
 import { Prompt } from "@/features/prompt/Prompt";
@@ -13,7 +13,6 @@ export function Terminal({ onClose, onMinimize }: { onClose?: () => void; onMini
   const c = useTerminalController({ onClose, onMinimize });
 
   const { renderOutputEntry } = createTerminalRenderers(styles, {
-    onTermsClick: c.onTermsClick,
     onShowPrivateProject: c.showPrivateProject,
     onShowNdaDetails: () => c.showPrivateProject("Private project (NDA)"),
   });
@@ -30,46 +29,7 @@ export function Terminal({ onClose, onMinimize }: { onClose?: () => void; onMini
           . Use <code>↑</code>/<code>↓</code> for history. Use <code>Ctrl+L</code> to clear the screen.
         </>
       }
-      renderOverlay={(cc) => (
-        <>
-          {cc.lifeFlow.mode === "show_terms" ? (
-            <div className={styles.overlayBackdrop} role="dialog" aria-modal="true">
-              <div className={styles.vimWindow}>
-                <div className={styles.vimHeader}>vim — terms-and-conditions</div>
-
-                <div className={styles.vimBody}>
-                  <pre className={styles.vimText}>{TERMS_TEXT.join("\n")}</pre>
-                </div>
-
-                <form
-                  className={styles.vimFooter}
-                  onSubmit={(ev) => {
-                    ev.preventDefault();
-                    cc.onVimSubmit();
-                  }}
-                >
-                  <span className={styles.vimPrompt} aria-hidden="true">
-                    :
-                  </span>
-                  <input
-                    ref={cc.vimInputRef}
-                    className={styles.vimInput}
-                    value={cc.vimCommand}
-                    onChange={(e) => cc.setVimCommand(e.target.value)}
-                    autoCapitalize="none"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    spellCheck={false}
-                    placeholder="q to quit"
-                  />
-                </form>
-              </div>
-            </div>
-          ) : null}
-
-          {cc.matrixOpen ? <MatrixOverlay onClose={cc.closeMatrix} /> : null}
-        </>
-      )}
+      renderOverlay={(cc) => (cc.matrixOpen ? <MatrixOverlay onClose={cc.closeMatrix} /> : null)}
     />
   );
 }

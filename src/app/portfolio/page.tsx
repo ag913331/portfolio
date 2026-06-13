@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ScrollSpine } from "@/features/portfolio/ScrollSpine";
+import { ThemeToggle } from "@/features/portfolio/ThemeToggle";
 import { toHref } from "@/lib/helpers";
 import {
   CERTIFICATIONS,
@@ -51,6 +52,7 @@ export default function PortfolioPage() {
       <header className={styles.nav}>
         <span className={styles.navName}>{PROFILE.name}</span>
         <div className={styles.navLinks}>
+          <ThemeToggle />
           <a href="/cv.pdf" download className={styles.navLink}>
             Download CV
           </a>

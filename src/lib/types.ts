@@ -6,7 +6,7 @@ declare global {
   type Inline =
     | string
     | { kind: "link"; href: string; label: string; external?: boolean }
-    | { kind: "action"; action: "terms" | "project" | "nda"; label: string; arg?: string }
+    | { kind: "action"; action: "project" | "nda"; label: string; arg?: string }
     | { kind: "em"; text: string; tone: EmTone };
 
   /** One rendered terminal output line, built from structured content (see content/format). */
@@ -26,7 +26,6 @@ declare global {
   type CSSModuleClasses = Record<string, string>;
 
   type RendererCallbacks = {
-    onTermsClick: () => void;
     onShowPrivateProject: (title: string) => void;
     onShowNdaDetails: () => void;
   };

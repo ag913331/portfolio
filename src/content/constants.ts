@@ -4,23 +4,6 @@ export const MAX_TERMINALS = 5;
 export const USER = "alexandro";
 export const HOST = "localhost";
 
-export const LIFE_PROMPT_LINE =
-  "You are about to see some amazing pictures of me. Please accept terms and conditions first.";
-
-export const TERMS_TEXT: string[] = [
-  "TERMS AND CONDITIONS — LIFE MODE",
-  "",
-  "By continuing, you agree to the following:",
-  "",
-  "1) The content shown under the 'life' section may include personal photos and information.",
-  "2) These pictures may NOT be downloaded, redistributed, or used in any form without explicit permission.",
-  "3) No scraping, mirroring, or automated collection of the content is allowed.",
-  "",
-  "If you'd like to share anything, please ask first. Thanks :)",
-  "",
-  "Press :q to quit.",
-];
-
 export const PRIVATE_PROJECT_DESCRIPTIONS: Record<string, string[]> = {
   "Insurance Product Modeling Platform": [
     " ",
