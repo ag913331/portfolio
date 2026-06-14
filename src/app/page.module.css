@@ -21,37 +21,64 @@
   place-items: center;
 }
 
-/* Persistent escape hatch to the traditional (non-terminal) layout. */
+/* Persistent, eye-catching escape hatch to the traditional (non-terminal) layout. */
 .traditionalLink {
   position: fixed;
   top: 16px;
   right: 16px;
   z-index: 200;
   font-family: var(--mono);
-  font-size: 12.5px;
-  color: rgba(var(--muted), 0.95);
-  background: rgba(var(--surface-1), 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: #04121c;
+  background: rgba(var(--accent), 0.95);
+  border: 1px solid rgba(var(--accent), 1);
   border-radius: 999px;
-  padding: 8px 14px;
-  backdrop-filter: blur(8px);
+  padding: 9px 16px;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent), 0.5),
+    0 6px 24px rgba(var(--accent), 0.4);
+  animation: ctaPulse 2.6s ease-in-out infinite;
   transition:
-    background 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease;
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
 }
 
 .traditionalLink:hover {
-  color: rgba(var(--text), 0.95);
-  border-color: rgba(var(--accent), 0.45);
-  background: rgba(var(--accent), 0.1);
+  background: rgba(var(--accent), 1);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow:
+    0 0 0 1px rgba(var(--accent), 0.8),
+    0 8px 34px rgba(var(--accent), 0.65);
+}
+
+@keyframes ctaPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(var(--accent), 0.5),
+      0 6px 22px rgba(var(--accent), 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(var(--accent), 0.7),
+      0 6px 34px rgba(var(--accent), 0.65);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traditionalLink {
+    animation: none;
+  }
 }
 
 @media (max-width: 560px) {
   .traditionalLink {
     top: 10px;
     right: 10px;
-    font-size: 11px;
-    padding: 7px 10px;
+    font-size: 12px;
+    padding: 8px 12px;
   }
 }
