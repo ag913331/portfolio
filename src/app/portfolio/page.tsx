@@ -7,6 +7,7 @@ import { Reveal } from "@/features/portfolio/Reveal";
 import { Stats } from "@/features/portfolio/Stats";
 import { TypedText } from "@/features/portfolio/TypedText";
 import { SectionNav } from "@/features/portfolio/SectionNav";
+import { BackToTop } from "@/features/portfolio/BackToTop";
 import { toHref } from "@/lib/helpers";
 import {
   CERTIFICATIONS,
@@ -57,6 +58,7 @@ export default function PortfolioPage() {
       </noscript>
 
       <ScrollSpine />
+      <BackToTop />
 
       <header className={styles.nav}>
         <span className={styles.navName}>{PROFILE.name}</span>
