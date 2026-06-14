@@ -36,6 +36,10 @@ export function SectionNav() {
           {s.label}
         </a>
       ))}
+
+      <button type="button" className={styles.blog} disabled title="Coming soon">
+        Blog
+      </button>
     </nav>
   );
 }
