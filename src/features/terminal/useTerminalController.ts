@@ -318,6 +318,19 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [entries.length]);
 
+  // Refocus the input when the window/tab regains focus, so the visitor can type
+  // immediately. Skipped while booting/overlay-open, and only steals focus when
+  // nothing else is focused (avoids hijacking another terminal's input).
+  useEffect(() => {
+    const onWindowFocus = () => {
+      if (isBooting || isOverlayOpen) return;
+      const active = document.activeElement;
+      if (!active || active === document.body) inputRef.current?.focus();
+    };
+    window.addEventListener("focus", onWindowFocus);
+    return () => window.removeEventListener("focus", onWindowFocus);
+  }, [isBooting, isOverlayOpen]);
+
   useEffect(() => {
     const bootCommand = "system --init";
     const tickMs = 75;

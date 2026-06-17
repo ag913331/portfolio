@@ -72,7 +72,11 @@ export function TerminalView<C extends TerminalViewBaseController>({
   } = controller;
 
   return (
-    <div className={`${styles.wrap} ${isMaximized ? styles.wrapMax : ""}`} onMouseDown={focusInput}>
+    <div
+      className={`${styles.wrap} ${isMaximized ? styles.wrapMax : ""}`}
+      onMouseDown={focusInput}
+      onMouseOver={focusInput}
+    >
       <TerminalChrome
         ariaLabel="Portfolio terminal"
         title={chromeTitle}

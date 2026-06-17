@@ -18,7 +18,10 @@ export function DraggableTerminalWindow({
   closeWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: w.id });
+  // Note: dnd-kit's `attributes` are intentionally omitted — they put tabIndex/role="button"
+  // on the window, which steals click focus from the terminal input. Mouse dragging works
+  // via `listeners` alone.
+  const { listeners, setNodeRef, transform, isDragging } = useDraggable({ id: w.id });
 
   if (w.minimized) return null;
 
@@ -34,7 +37,6 @@ export function DraggableTerminalWindow({
         transform: `translate3d(${x}px, ${y}px, 0)`,
         transition: isDragging ? "none" : "transform 120ms ease-out",
       }}
-      {...attributes}
       {...listeners}
       onClick={() => bringToFront(w.id)}
     >
