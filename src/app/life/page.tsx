@@ -19,7 +19,7 @@ export default function LifePage() {
           </p>
 
           <div className={surface.actions}>
-            <Link className={surface.btn} href="/">
+            <Link className={surface.btn} href="/terminal">
               $: Back to terminal
             </Link>
           </div>

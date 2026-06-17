@@ -1,0 +1,84 @@
+.page {
+  overflow: hidden;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 28px 16px;
+  background: var(--page-bg);
+}
+
+.main {
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.terminalStage {
+  position: relative;
+  width: 100%;
+  min-height: min(78vh, 720px);
+  display: grid;
+  place-items: center;
+}
+
+/* Persistent, eye-catching escape hatch to the traditional (non-terminal) layout. */
+.traditionalLink {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 200;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: #04121c;
+  background: rgba(var(--accent), 0.95);
+  border: 1px solid rgba(var(--accent), 1);
+  border-radius: 999px;
+  padding: 9px 16px;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent), 0.5),
+    0 6px 24px rgba(var(--accent), 0.4);
+  animation: ctaPulse 2.6s ease-in-out infinite;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+.traditionalLink:hover {
+  background: rgba(var(--accent), 1);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow:
+    0 0 0 1px rgba(var(--accent), 0.8),
+    0 8px 34px rgba(var(--accent), 0.65);
+}
+
+@keyframes ctaPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(var(--accent), 0.5),
+      0 6px 22px rgba(var(--accent), 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(var(--accent), 0.7),
+      0 6px 34px rgba(var(--accent), 0.65);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traditionalLink {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .traditionalLink {
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}

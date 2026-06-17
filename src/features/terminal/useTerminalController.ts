@@ -239,7 +239,7 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
 
       if (cmd === "portfolio") {
         pushText(["Opening traditional layout ..."], true);
-        router.push("/portfolio");
+        router.push("/");
         return;
       }
 

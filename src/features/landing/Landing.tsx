@@ -21,7 +21,7 @@ export function Landing({ onOpenTerminal }: { onOpenTerminal: () => void }) {
         </div>
 
         <p className={surface.altLink}>
-          If you want a more traditional layout, <Link href="/portfolio">click here</Link>.
+          If you want a more traditional layout, <Link href="/">click here</Link>.
         </p>
       </div>
     </section>
