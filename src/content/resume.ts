@@ -56,7 +56,7 @@ export type Contact = { label: string; value: string };
 export const CONTACTS: Contact[] = [
   { label: "GitHub", value: "https://github.com/ag913331" },
   { label: "LinkedIn", value: "www.linkedin.com/in/alexandro-georgiev-711b631b5" },
-  { label: "Email", value: "georgievalexandro@gmail.com" },
+  { label: "Email", value: "contact@georgievalexandro.com" },
 ];
 
 export type Certification = {
