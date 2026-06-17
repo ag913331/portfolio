@@ -92,7 +92,7 @@ export default function PortfolioPage() {
         <section className={styles.hero}>
           <span className={styles.statusPill}>
             <span className={styles.statusDot} aria-hidden="true" />
-            Available for freelance
+            Available for work
           </span>
           <p className={styles.kicker}>Hello, I&rsquo;m</p>
           <h1 className={styles.name}>{PROFILE.name}</h1>

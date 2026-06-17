@@ -49,8 +49,10 @@ export function ScrollSpine() {
 
     const update = () => {
       if (!length || !pageHeight) return;
-      const anchor = window.scrollY + window.innerHeight / 2;
-      const t = Math.min(1, Math.max(0, anchor / pageHeight));
+      // Overall scroll progress: 0 at the top, 1 when fully scrolled to the bottom,
+      // so the dot travels the entire path down the page.
+      const max = pageHeight - window.innerHeight;
+      const t = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 1;
       const len = t * length;
       trail.style.strokeDasharray = `${len} ${length}`;
       const p = trail.getPointAtLength(len);
@@ -60,7 +62,9 @@ export function ScrollSpine() {
 
     const measure = () => {
       const w = page.clientWidth;
-      pageHeight = page.scrollHeight;
+      // offsetHeight (not scrollHeight): the spine's own absolutely-positioned SVG would
+      // otherwise inflate scrollHeight, making the path longer than the page can scroll.
+      pageHeight = page.offsetHeight;
       const d = buildPath(w, pageHeight);
       rail.setAttribute("d", d);
       trail.setAttribute("d", d);
