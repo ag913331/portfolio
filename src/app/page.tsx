@@ -126,6 +126,26 @@ export default function PortfolioPage() {
         </Reveal>
 
         <Reveal>
+          <section className={styles.section}>
+            <h2 className={styles.h2}>Skills</h2>
+            <div className={styles.cards}>
+              {SKILLS.map((g) => (
+                <div key={g.title} className={styles.card}>
+                  <h3 className={styles.cardTitle}>{g.title}</h3>
+                  <div className={styles.chips}>
+                    {g.items.map((s) => (
+                      <span key={s} className={styles.chip}>
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </Reveal>
+
+        <Reveal>
           <section id="experience" className={styles.section}>
             <h2 className={styles.h2}>Experience</h2>
             <div className={styles.timeline}>
@@ -144,26 +164,6 @@ export default function PortfolioPage() {
                     ))}
                   </ul>
                 </article>
-              ))}
-            </div>
-          </section>
-        </Reveal>
-
-        <Reveal>
-          <section className={styles.section}>
-            <h2 className={styles.h2}>Skills</h2>
-            <div className={styles.cards}>
-              {SKILLS.map((g) => (
-                <div key={g.title} className={styles.card}>
-                  <h3 className={styles.cardTitle}>{g.title}</h3>
-                  <div className={styles.chips}>
-                    {g.items.map((s) => (
-                      <span key={s} className={styles.chip}>
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               ))}
             </div>
           </section>
