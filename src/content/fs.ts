@@ -53,7 +53,7 @@ export const ROOT: FsDir = dir("~", [
       text("Run `projects` for the interactive list."),
     ]),
   ]),
-  file("cv.pdf", () => [text("Binary file. Run `download` to grab the PDF.", true)]),
+  file("cv-georgievalexandro.pdf", () => [text("Binary file. Run `download` to grab the PDF.", true)]),
 ]);
 
 /** Resolve a path string (relative to cwd) into its segment list + the node it points at. */

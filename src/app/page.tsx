@@ -65,7 +65,7 @@ export default function PortfolioPage() {
         <SectionNav />
         <div className={styles.navLinks}>
           <ThemeToggle />
-          <a href="/cv.pdf" download className={styles.downloadBtn}>
+          <a href="/cv-georgievalexandro.pdf" download className={styles.downloadBtn}>
             <svg
               className={styles.downloadIcon}
               viewBox="0 0 24 24"

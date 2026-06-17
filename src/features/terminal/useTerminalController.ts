@@ -193,10 +193,10 @@ export function useTerminalController({ onClose, onMinimize }: { onClose?: () =>
       }
 
       if (command === "download") {
-        pushText(["Downloading cv.pdf ..."], true);
+        pushText(["Downloading cv-georgievalexandro.pdf ..."], true);
         const a = document.createElement("a");
-        a.href = "/cv.pdf";
-        a.download = "cv.pdf";
+        a.href = "/cv-georgievalexandro.pdf";
+        a.download = "cv-georgievalexandro.pdf";
         a.rel = "noopener noreferrer";
         document.body.appendChild(a);
         a.click();
