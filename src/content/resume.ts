@@ -305,12 +305,7 @@ export const PUBLIC_PROJECTS: PublicProject[] = [
     name: "GitHub User Activity CLI",
     description: "fetches and displays both public and private GitHub activity for a specific user",
     repo: "https://github.com/ag913331/github-user-activity",
-  },
-  {
-    name: "Ubuntu Autoinstall ISO",
-    description: "automates creation of a customized Ubuntu Server ISO with minimal user interaction",
-    repo: "https://github.com/ag913331/devops-roadmap/tree/main/ubuntu-autoinstall-iso",
-  },
+  }
 ];
 
 /** Titles must match the keys of PRIVATE_PROJECT_DESCRIPTIONS in constants.ts. */
