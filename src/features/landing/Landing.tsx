@@ -15,7 +15,7 @@ export function Landing({ onOpenTerminal }: { onOpenTerminal: () => void }) {
             $: Open terminal
           </Button>
 
-          <Link className={surface.btn} href="/cv.pdf" download>
+          <Link className={surface.btn} href="/cv-georgievalexandro.pdf" download>
             $: Download CV
           </Link>
         </div>
