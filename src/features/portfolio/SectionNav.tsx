@@ -37,6 +37,10 @@ export function SectionNav() {
         </a>
       ))}
 
+      <a href="https://loop-c9h.pages.dev/" target="_blank" rel="noopener noreferrer" className={styles.loop}>
+        loop
+      </a>
+
       <button type="button" className={styles.blog} disabled title="Coming soon">
         Blog
       </button>
