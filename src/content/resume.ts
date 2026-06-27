@@ -305,6 +305,11 @@ export const PUBLIC_PROJECTS: PublicProject[] = [
     name: "GitHub User Activity CLI",
     description: "fetches and displays both public and private GitHub activity for a specific user",
     repo: "https://github.com/ag913331/github-user-activity",
+  },
+  {
+    name: "loop",
+    description: "interactive coding education platform — learn to code by watching concepts move",
+    repo: "https://github.com/ag913331/loop",
   }
 ];
 
